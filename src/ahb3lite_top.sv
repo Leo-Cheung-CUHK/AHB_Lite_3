@@ -106,7 +106,7 @@ FIFO_Reader_Helper  FIFO_Reader_Helper_1 (
                         .Serialize_Counter(Serialize_Counter)
 );
 
-async_fifo  #(32, 6) FIFO_Master_Side_1(
+async_fifo  FIFO_Master_Side_1(
                         .wreq(FIFO_wr_en),
                         .wclk(HCLK),
                         .wrst_n(HRESETn),

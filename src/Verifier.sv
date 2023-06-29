@@ -1,33 +1,12 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 29.06.2023 09:48:40
-// Design Name: 
-// Module Name: Verifier
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
 module Verifier(
-    input  bit           CLK,
-    input  logic         RESETn,
+    input  bit          CLK,
+    input  logic        RESETn,
 
     input logic         [15:0] i_RCC_DMA_ADDR_HIGH,
     input logic         [15:0] i_RCC_DMA_ADDR_LOW,
 
-    input  logic         Read_Request,
+    input  logic        Read_Request,
 
     input logic         i_Reader_FIFO_rd_en,
     input logic         [7:0] i_serialized_output,
@@ -40,9 +19,8 @@ module Verifier(
     );
 
     logic               error;
-    Verifier_state      State;
-
     logic               [31:0] internal_HRDATA;
+    Verifier_state      State;
 
     always_ff@(posedge CLK) begin
         if (!RESETn) begin
@@ -52,7 +30,6 @@ module Verifier(
         end else begin
             case (State)
                 Verifier_IDLE : begin 
-
                     if (Read_Request == 1) begin
                         State            <= Verifier_Start;
                         DMA_READ         <= 1;
@@ -91,7 +68,11 @@ module Verifier(
                         State <= State;
                 end
 
-
+                default: begin
+                    State <= Verifier_IDLE;
+                    DMA_READ        <= 0;
+                    DMA_READ_addr   <= 0;
+                end
             endcase
         end
     end
@@ -119,7 +100,6 @@ module Verifier(
                             error = (i_serialized_output != internal_HRDATA[31:24]) ? 1 : 0;
                         end
                     endcase 
-                
             end
 
             Verifier_CHECK : begin 
@@ -146,11 +126,9 @@ module Verifier(
             end
 
             default: begin
-                error = 0;
+                error           = 0;
+                internal_HRDATA = 0;
             end
         endcase
     end
-
-
-
 endmodule

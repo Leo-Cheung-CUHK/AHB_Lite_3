@@ -52,6 +52,9 @@ ahb3lite_top top_ahb(   .HCLK(HCLK),
                         .i_Read_Request(i_Read_Request)
 );
 
+defparam top_ahb.FIFO_Master_Side_1.DSIZE = 32;
+defparam top_ahb.FIFO_Master_Side_1.ASIZE = 6;
+
 randNumGen randNumGen_Int = new();
 
 initial

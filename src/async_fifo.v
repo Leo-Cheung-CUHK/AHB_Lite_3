@@ -94,9 +94,6 @@ always @ (posedge wclk or negedge wrst_n) //ET
     else
         number <= wbin - rbin; 
     
-
- 
-
 // generating wptr to send to rclk domain
 // convert from binary to gray
 assign wptr_nxt = (wbin_nxt>>1) ^ wbin_nxt; 

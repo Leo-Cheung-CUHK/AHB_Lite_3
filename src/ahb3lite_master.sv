@@ -37,8 +37,7 @@ module ahb3lite_master(
     logic   [5:0]   RCC_BUFFER_LENGTH;
     logic   [31:0]  i_HADDR;
     logic   [31:0]  temp_addr;
-
-    logic [5:0]  RCC_Byte_CNT;
+    logic   [5:0]  RCC_Byte_CNT;
 
     task Configure_Master(input HBURST_Type i_HBURST);        
            @(posedge HCLK) begin
@@ -183,6 +182,7 @@ module ahb3lite_master(
                     else 
                         temp_addr <= i_HADDR;
                 end
+
                 Data_Phase: begin
                     if (HREADY == 1)
                         if (HTRANS == SEQ && HBURST == INCR) 
@@ -194,6 +194,7 @@ module ahb3lite_master(
                     else
                         temp_addr     <= temp_addr;
                 end
+                
                 default: 
                     temp_addr         <= 0;
             endcase
