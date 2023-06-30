@@ -47,8 +47,8 @@ module ahb3lite_top(
                 logic                   [31 : 0] FIFO_dout;
                 logic                   FIFO_valid;
                 logic                   [5 : 0] FIFO_data_count;
-                logic                   FIFO_prog_full;
-                logic                   FIFO_prog_empty;
+                logic                   FIFO_full;
+                logic                   FIFO_empty;
 
                 logic                   [7:0] O_serialized_output;
                 logic                   O_serialized_output_valid;
@@ -66,7 +66,7 @@ task configure_FIFO(input [5  : 0] i_FIFO_prog_empty_thresh,input [5  : 0] i_FIF
 endtask;
 
 assign  FIFO_din    = o_HRDATA;
-assign  FIFO_wr_en  = o_HRDATA_En && ~ FIFO_prog_full;
+assign  FIFO_wr_en  = o_HRDATA_En && ~ FIFO_full;
 assign  FIFO_rd_en  = o_FIFO_rd_en;
 
 Verifier  Verifier_1(
@@ -96,7 +96,7 @@ FIFO_Reader_Helper  FIFO_Reader_Helper_1 (
                         .Read_Request(i_Read_Request),
 
                         .i_RCC_BUFFER_LENGTH(o_RCC_BUFFER_LENGTH),
-                        .i_FIFO_prog_empty(FIFO_prog_empty),
+                        .i_FIFO_empty(FIFO_empty),
                         .i_FIFO_dout(FIFO_dout),
 
                         .o_FIFO_rd_en(o_FIFO_rd_en),
@@ -118,8 +118,8 @@ async_fifo  FIFO_Master_Side_1(
                         .wdata(FIFO_din),
                         .rdata(FIFO_dout),
 
-                        .wfull(FIFO_prog_full),
-                        .rempty(FIFO_prog_empty),
+                        .wfull(FIFO_full),
+                        .rempty(FIFO_empty),
 
                         .number(FIFO_data_count)
 );

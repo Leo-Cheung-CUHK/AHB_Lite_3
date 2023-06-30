@@ -30,23 +30,25 @@ import ahb3lite_pkg::* ;
     
     logic [3:0] wait_state_counter;
     logic [7:0] data_state_counter;
-    logic [3:0] wait_during_data_state_counter;
+    logic [3:0] hold_state_counter;
 
     logic ReadyOn;
-    logic wait_state_on;
-    logic wait_during_data_state_on;
+    logic WAIT_STATE_ON;
     logic [3:0] WAIT_STATE_N;
-    logic [3:0] WAIT_DURING_DATA_STATE_N;
-    logic [2:0] WAIT_DURING_DATA_STATE_INDEX;
 
-    task  Configure_Slave(input logic i_ReadyOn, input logic i_wait_state_on, input  logic i_wait_during_data_state_on, 
-    input logic [3:0] i_WAIT_STATE_N, input logic [3:0] i_WAIT_DURING_DATA_STATE_N, input logic [2:0] i_WAIT_DURING_DATA_STATE_INDEX);
-        ReadyOn                       <= i_ReadyOn;
-        wait_state_on                 <= i_wait_state_on;
-        wait_during_data_state_on     <= i_wait_during_data_state_on;
-        WAIT_STATE_N                  <= i_WAIT_STATE_N;
-        WAIT_DURING_DATA_STATE_N      <= i_WAIT_DURING_DATA_STATE_N;
-        WAIT_DURING_DATA_STATE_INDEX  <= i_WAIT_DURING_DATA_STATE_INDEX;
+    logic HOLD_STATE_ON;
+    logic [3:0] HOLD_STATE_N;
+    logic [2:0] HOLD_STATE_INDEX;
+
+    task  Configure_Slave(input logic i_ReadyOn, input logic i_WAIT_STATE_ON, input  logic i_HOLD_STATE_ON, 
+    input logic [3:0] i_WAIT_STATE_N, input logic [3:0] i_HOLD_STATE_N, input logic [2:0] i_HOLD_STATE_INDEX);
+        ReadyOn           <= i_ReadyOn;
+        WAIT_STATE_ON     <= i_WAIT_STATE_ON;
+        WAIT_STATE_N      <= i_WAIT_STATE_N;
+
+        HOLD_STATE_ON     <= i_HOLD_STATE_ON;
+        HOLD_STATE_N      <= i_HOLD_STATE_N;
+        HOLD_STATE_INDEX  <= i_HOLD_STATE_INDEX;
     endtask 
 
     assign HRDATA = (mem_read_flag == 1) ? HRDATA_fromMem : 0;
@@ -92,9 +94,9 @@ import ahb3lite_pkg::* ;
                 Address_Phase: begin   
                     mem_WR_addr         <= HADDR; 
                     wait_state_counter  <= 0;
-                    data_state_counter <= 0;
+                    data_state_counter  <= 0;
 
-                    if (wait_state_on == 1) begin
+                    if (WAIT_STATE_ON == 1) begin
                         State           <= Wait_State;
                         HREADYOUT       <= 0;
                     end else begin
@@ -116,12 +118,12 @@ import ahb3lite_pkg::* ;
                 end
 
                 Data_Phase: begin  
-                    data_state_counter                  <= data_state_counter + 1;
+                    data_state_counter <= data_state_counter + 1;
 
-                    if ((wait_during_data_state_on == 1) && (data_state_counter == WAIT_DURING_DATA_STATE_INDEX) ) begin
+                    if ((HOLD_STATE_ON == 1) && (data_state_counter == HOLD_STATE_INDEX) ) begin
                         mem_WR_addr                     <= HADDR;
-                        wait_during_data_state_counter  <= 0;
-                        State                           <= Wait_In_Data_State;
+                        hold_state_counter  <= 0;
+                        State                           <= Hold_State;
                         HREADYOUT                       <= 0;
 
                     end else begin 
@@ -144,15 +146,15 @@ import ahb3lite_pkg::* ;
                     end
                 end
 
-                Wait_In_Data_State: begin   
-                    if (wait_during_data_state_counter < WAIT_DURING_DATA_STATE_N - 1) begin
-                        wait_during_data_state_counter <= wait_during_data_state_counter + 1;
+                Hold_State: begin   
+                    if (hold_state_counter < HOLD_STATE_N - 1) begin
+                        hold_state_counter <= hold_state_counter + 1;
                         State                          <= State;
                         HREADYOUT                      <= 0;
                     end else begin
                         State                          <= Data_Phase;
                         HREADYOUT                      <= 1;
-                        wait_during_data_state_counter <= 0;
+                        hold_state_counter <= 0;
                     end
                 end
 

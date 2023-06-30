@@ -28,21 +28,24 @@ module test_master();
         logic           [15:0] RCC_DMA_ADDR_HIGH;
         logic           [15:0] RCC_DMA_ADDR_LOW;
        
-        logic           [5:0]  RCC_Words_N;
-
+        logic           [5:0]  RCC_BUFFER_LENGTH_IN_WORDS;
 
         // Parameters to be randomized
         HBURST_Type     HBURST; 
 
         logic           i_ReadyOn;
-        logic           i_wait_state_on;
-        logic           i_wait_during_data_state_on;
-
+        logic           i_WAIT_STATE_ON;
         logic           [3:0]  i_WAIT_STATE_N;
-        logic           [3:0] i_WAIT_DURING_DATA_STATE_N;
-        logic           [2:0] i_WAIT_DURING_DATA_STATE_INDEX;
+
+        logic           i_HOLD_STATE_ON;
+        logic           [3:0]  i_HOLD_STATE_N;
+        logic           [2:0]  i_HOLD_STATE_INDEX;
+
         logic           [5  : 0] i_FIFO_prog_empty_thresh;
         logic           [5  : 0] i_FIFO_prog_full_thresh;
+
+        // Run time counter
+        logic           [63 : 0]  Test_N = 0;
 
 ahb3lite_top top_ahb(   .HCLK(HCLK), 
                         .SLOW_CLK(SLOW_CLK), 
@@ -75,6 +78,7 @@ begin
     begin
         HRESETn <= 0;
         i_SystemStart <= 0;
+        Test_N <= Test_N + 1;
     end
 
     @(posedge HCLK)
@@ -109,10 +113,10 @@ begin
             i_ReadyOn <= 1;
 
             if (randNumGen_Int.slave_wait_N == 0) begin
-                i_wait_state_on   <= 0;
+                i_WAIT_STATE_ON   <= 0;
                 i_WAIT_STATE_N    <= 0;
             end else begin
-                i_wait_state_on   <= randNumGen_Int.wait_state_on;
+                i_WAIT_STATE_ON   <= randNumGen_Int.wait_state_on;
                 i_WAIT_STATE_N    <= randNumGen_Int.slave_wait_N;
             end
 
@@ -125,7 +129,7 @@ begin
         @(posedge HCLK);
 
         @(posedge HCLK) begin
-            RCC_Words_N  = ((RCC_BUFFER_LENGTH[0] | RCC_BUFFER_LENGTH[1]) == 0)?
+            RCC_BUFFER_LENGTH_IN_WORDS  = ((RCC_BUFFER_LENGTH[0] | RCC_BUFFER_LENGTH[1]) == 0)?
             (RCC_BUFFER_LENGTH >> 2) : (RCC_BUFFER_LENGTH >> 2) + 1;
         end
 
@@ -133,16 +137,16 @@ begin
 
         @(posedge HCLK)
         begin
-            if (RCC_Words_N < 2) begin
-                i_wait_during_data_state_on   <= 0;
-                i_WAIT_DURING_DATA_STATE_N    <= 0;
+            if (RCC_BUFFER_LENGTH_IN_WORDS < 2) begin
+                i_HOLD_STATE_ON   <= 0;
+                i_HOLD_STATE_N    <= 0;
             end else begin 
                 if (randNumGen_Int.slave_wait_in_data_N[0] == 0) begin 
-                    i_wait_during_data_state_on   <= 0;
-                    i_WAIT_DURING_DATA_STATE_N    <= 0;
+                    i_HOLD_STATE_ON   <= 0;
+                    i_HOLD_STATE_N    <= 0;
                 end else begin 
-                    i_wait_during_data_state_on   <= randNumGen_Int.wait_in_data_on;
-                    i_WAIT_DURING_DATA_STATE_N    <= randNumGen_Int.slave_wait_in_data_N;
+                    i_HOLD_STATE_ON   <= randNumGen_Int.wait_in_data_on;
+                    i_HOLD_STATE_N    <= randNumGen_Int.slave_wait_in_data_N;
                 end
             end
         end
@@ -151,15 +155,15 @@ begin
 
         @(posedge HCLK)
         begin
-            if (i_wait_during_data_state_on != 0) 
-                if (randNumGen_Int.slave_wait_in_data_index >= RCC_Words_N -1)
-                    i_WAIT_DURING_DATA_STATE_INDEX <= RCC_Words_N - 2;
+            if (i_HOLD_STATE_ON != 0) 
+                if (randNumGen_Int.slave_wait_in_data_index >= RCC_BUFFER_LENGTH_IN_WORDS -1)
+                    i_HOLD_STATE_INDEX <= RCC_BUFFER_LENGTH_IN_WORDS - 2;
                 else 
-                    i_WAIT_DURING_DATA_STATE_INDEX <= randNumGen_Int.slave_wait_in_data_index;
+                    i_HOLD_STATE_INDEX <= randNumGen_Int.slave_wait_in_data_index;
             else  
-                i_WAIT_DURING_DATA_STATE_INDEX <= 0;
+                i_HOLD_STATE_INDEX <= 0;
 
-            if ((randNumGen_Int.burst_type == 0) || (RCC_Words_N == 1) )
+            if ((randNumGen_Int.burst_type == 0) || (RCC_BUFFER_LENGTH_IN_WORDS == 1) )
                 HBURST            <= SINGLE;
             else 
                 HBURST            <= INCR;
@@ -170,15 +174,14 @@ begin
             // FIFO Configuration
             i_FIFO_prog_empty_thresh <= 2;
             i_FIFO_prog_full_thresh  <= 30;
-
         end
 
         @(posedge HCLK);
 
         top_ahb.configure_FIFO(i_FIFO_prog_empty_thresh, i_FIFO_prog_full_thresh);  
         top_ahb.master.Configure_Master(HBURST);
-        top_ahb.slave.Configure_Slave(i_ReadyOn, i_wait_state_on, i_wait_during_data_state_on,
-        i_WAIT_STATE_N, i_WAIT_DURING_DATA_STATE_N, i_WAIT_DURING_DATA_STATE_INDEX);
+        top_ahb.slave.Configure_Slave(i_ReadyOn, i_WAIT_STATE_ON, i_HOLD_STATE_ON,
+        i_WAIT_STATE_N, i_HOLD_STATE_N, i_HOLD_STATE_INDEX);
 
         @(posedge HCLK);
 

@@ -9,7 +9,7 @@ module FIFO_Reader_Helper(
     input  logic         Read_Request,
 
     input  logic         [5:0] i_RCC_BUFFER_LENGTH,
-    input  logic         i_FIFO_prog_empty,
+    input  logic         i_FIFO_empty,
     input  logic         [31 : 0] i_FIFO_dout,
     output logic         o_FIFO_rd_en,
 
@@ -43,12 +43,12 @@ module FIFO_Reader_Helper(
                     else 
                         RCC_Words_N  <= (i_RCC_BUFFER_LENGTH >> 2) + 1;
                         
-                    if (Read_Request && i_FIFO_prog_empty == 0)  begin 
+                    if (Read_Request && i_FIFO_empty == 0)  begin 
                         Bytes_Counter <= 1;
                         Words_Counter <= 1;
                         State <= Helper_READ;                            
                     end else begin
-                        Bytes_Counter     <= 0;
+                        Bytes_Counter <= 0;
                         Words_Counter <= 0;
                         State <= Helper_IDLE;
                     end
@@ -64,7 +64,7 @@ module FIFO_Reader_Helper(
                         3: begin
                             Serialize_Counter <= 0;
 
-                            if (Words_Counter <= RCC_Words_N - 1  && i_FIFO_prog_empty == 0) 
+                            if (Words_Counter <= RCC_Words_N - 1  && i_FIFO_empty == 0) 
                                 Words_Counter <= Words_Counter + 1;
                             else begin 
                                 Words_Counter <= 0;
