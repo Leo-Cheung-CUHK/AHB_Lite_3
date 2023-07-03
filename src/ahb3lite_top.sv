@@ -4,7 +4,12 @@ module ahb3lite_top(
                 input   logic           SLOW_CLK,
                 input   logic           SLOW_RESETn,
                 input   logic           i_Read_Request,
-                input   logic           i_SystemStart
+                input   logic           i_SystemStart,
+
+                output  logic           [7:0] O_serialized_output,
+                output  logic           O_serialized_output_valid,
+                output  logic           [1:0] O_Serialize_Counter,
+                output  logic           [15:0] O_Bytes_Counter
 );
                 logic                   SystemStart;
 
@@ -50,10 +55,6 @@ module ahb3lite_top(
                 logic                   FIFO_full;
                 logic                   FIFO_empty;
 
-                logic                   [7:0] O_serialized_output;
-                logic                   O_serialized_output_valid;
-                logic                   [1:0] Serialize_Counter;
-
                 logic                   verifier_DMA_READ_Flag;
                 logic                   [31 : 0] verifier_DMA_READ_Addr;
                 logic                   [31 : 0] verifier_DMA_READ_Data;
@@ -82,7 +83,7 @@ Verifier  Verifier_1(
                         .i_Reader_FIFO_rd_en(o_FIFO_rd_en),
                         .i_serialized_output(O_serialized_output),
                         .i_serialized_output_valid(O_serialized_output_valid),
-                        .Serialize_Counter(Serialize_Counter),
+                        .Serialize_Counter(O_Serialize_Counter),
 
                         .DMA_READ(verifier_DMA_READ_Flag),
                         .DMA_READ_addr(verifier_DMA_READ_Addr),
@@ -95,7 +96,7 @@ FIFO_Reader_Helper  FIFO_Reader_Helper_1 (
                         .RESETn(SLOW_RESETn),
 
                         .Read_Request(i_Read_Request),
-
+                        
                         .i_RCC_BUFFER_LENGTH(o_RCC_BUFFER_LENGTH),
                         .i_FIFO_empty(FIFO_empty),
                         .i_FIFO_dout(FIFO_dout),
@@ -104,7 +105,8 @@ FIFO_Reader_Helper  FIFO_Reader_Helper_1 (
 
                         .serialized_output(O_serialized_output),
                         .serialized_output_valid(O_serialized_output_valid),
-                        .Serialize_Counter(Serialize_Counter)
+                        .Serialize_Counter(O_Serialize_Counter),
+                        .Bytes_Counter(O_Bytes_Counter)
 );
 
 async_fifo  FIFO_Master_Side_1(

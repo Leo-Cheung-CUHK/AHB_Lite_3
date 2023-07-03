@@ -23,6 +23,12 @@ module test_master();
        
         logic           i_SystemStart;
         logic           i_Read_Request;
+
+        // output from the Top Module
+        logic           [7:0] O_serialized_output;
+        logic           O_serialized_output_valid;
+        logic           [1:0] O_Serialize_Counter;
+        logic           [15:0] O_Bytes_Counter;
        
         logic           [5:0]  RCC_BUFFER_LENGTH;
         logic           [15:0] RCC_DMA_ADDR_HIGH;
@@ -52,7 +58,12 @@ ahb3lite_top top_ahb(   .HCLK(HCLK),
                         .HRESETn(HRESETn), 
                         .SLOW_RESETn(SLOW_RESETn), 
                         .i_SystemStart(i_SystemStart),
-                        .i_Read_Request(i_Read_Request)
+                        .i_Read_Request(i_Read_Request),
+
+                        .O_serialized_output(O_serialized_output),
+                        .O_serialized_output_valid(O_serialized_output_valid),
+                        .O_Serialize_Counter(O_Serialize_Counter),
+                        .O_Bytes_Counter(O_Bytes_Counter)
 );
 
 defparam top_ahb.FIFO_Master_Side_1.DSIZE = 32;

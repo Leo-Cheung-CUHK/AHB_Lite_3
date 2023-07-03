@@ -138,6 +138,8 @@ module Verifier(
                             data_error = (i_serialized_output != internal_HRDATA[31:24]) ? 1 : 0;
                         end
                     endcase 
+                else
+                    data_error = 0;
             end
 
             default: begin

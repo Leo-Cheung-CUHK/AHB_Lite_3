@@ -16,14 +16,13 @@ module FIFO_Reader_Helper(
     output logic         [7:0] serialized_output,
     output logic         serialized_output_valid,
 
-    output logic         [1:0] Serialize_Counter
-
+    output logic         [1:0] Serialize_Counter,
+    output logic         [15:0] Bytes_Counter
     );
 
     FIFO_Reader_Help_state    State;
 
     logic                [15:0] Words_Counter;
-    logic                [15:0] Bytes_Counter;
     logic                [15:0] RCC_Words_N;
 
     always_ff@(posedge CLK) begin
