@@ -22,9 +22,9 @@ module FIFO_Reader_Helper(
 
     FIFO_Reader_Help_state    State;
 
-    logic                [5:0] Words_Counter;
-    logic                [5:0] Bytes_Counter;
-    logic                [5:0] RCC_Words_N;
+    logic                [15:0] Words_Counter;
+    logic                [15:0] Bytes_Counter;
+    logic                [15:0] RCC_Words_N;
 
     always_ff@(posedge CLK) begin
         if (!RESETn) begin

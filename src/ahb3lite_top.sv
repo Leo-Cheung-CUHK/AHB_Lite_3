@@ -75,6 +75,7 @@ Verifier  Verifier_1(
 
                         .i_RCC_DMA_ADDR_HIGH(o_RCC_DMA_ADDR_HIGH),
                         .i_RCC_DMA_ADDR_LOW(o_RCC_DMA_ADDR_LOW),
+                        .i_RCC_BUFFER_LENGTH(o_RCC_BUFFER_LENGTH),
 
                         .Read_Request(i_Read_Request),
 

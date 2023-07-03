@@ -32,12 +32,11 @@ module ahb3lite_master(
                 output logic        o_HRDATA_En
     );
 
-    logic   [5:0]  RCC_Words_CNT;
-    logic   [5:0]  RCC_Words_N;
+    logic   [5:0]   RCC_Words_CNT;
+    logic   [5:0]   RCC_Words_N;
     logic   [5:0]   RCC_BUFFER_LENGTH;
     logic   [31:0]  i_HADDR;
     logic   [31:0]  temp_addr;
-    logic   [5:0]  RCC_Byte_CNT;
 
     task Configure_Master(input HBURST_Type i_HBURST);        
            @(posedge HCLK) begin
@@ -60,16 +59,14 @@ module ahb3lite_master(
         if (HRESETn == 0) begin
             State         <= Idle;
             RCC_Words_CNT <= 0;
-            RCC_Byte_CNT  <= 0;
             HSIZE         <= 0;
-            Master_Done <= 0;
+            Master_Done   <= 0;
             i_HADDR       <= 0;
 
         end else begin
             case(State)
                 Idle: begin 
                     RCC_Words_CNT <= 0;
-                    RCC_Byte_CNT  <= 0;
                     HSIZE         <= 0;
                     Master_Done   <= 0;
                     i_HADDR       <= 0;
@@ -98,7 +95,6 @@ module ahb3lite_master(
                 Address_Phase: begin
                     State         <= Data_Phase;
                     RCC_Words_CNT <= RCC_Words_N - 1; 
-                    RCC_Byte_CNT  <= RCC_BUFFER_LENGTH -  4;
                 end
 
                 Data_Phase: begin 
@@ -110,11 +106,6 @@ module ahb3lite_master(
                         end else begin
                             State        <= State; 
                             RCC_Words_CNT <= RCC_Words_CNT - 1; 
-
-                            if (RCC_Byte_CNT <  4)
-                                RCC_Byte_CNT  <= 0;
-                            else
-                                RCC_Byte_CNT  <= RCC_Byte_CNT -  4;
                         end 
                     end             
                 end
@@ -122,7 +113,6 @@ module ahb3lite_master(
                 default: begin
                     State         <= Idle;
                     RCC_Words_CNT <= 0;
-                    RCC_Byte_CNT  <= 0;
                     HSIZE         <= 0;
                     Master_Done   <= 0;
                     i_HADDR       <= 0;
@@ -154,6 +144,7 @@ module ahb3lite_master(
                             HTRANS = BUSY;
                         else
                             HTRANS = SEQ;
+                            
                     else if (HBURST == SINGLE)
                         if  (RCC_Words_CNT == 0)
                             HTRANS = IDLE;
@@ -177,7 +168,7 @@ module ahb3lite_master(
         end else begin
             case(State)
                 Address_Phase: begin
-                    if ( (HTRANS == NONSEQ && HBURST == INCR) || (HTRANS == NONSEQ && HBURST == SINGLE && RCC_Words_N > 1) )
+                    if ((HTRANS == NONSEQ && HBURST == INCR) || (HTRANS == NONSEQ && HBURST == SINGLE && RCC_Words_N > 1) )
                         temp_addr <= i_HADDR + 4;
                     else 
                         temp_addr <= i_HADDR;

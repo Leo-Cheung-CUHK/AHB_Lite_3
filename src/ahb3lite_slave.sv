@@ -130,9 +130,9 @@ import ahb3lite_pkg::* ;
                         if (HBURST == SINGLE) begin
                             mem_WR_addr     <= HADDR; 
                             if (HTRANS == NONSEQ) begin
-                                State           <= State;
+                                State       <= State;
                             end else 
-                                State           <= Idle;
+                                State       <= Idle;
 
                         end else if (HBURST == INCR) begin
                             mem_WR_addr     <= HADDR; 
@@ -154,7 +154,7 @@ import ahb3lite_pkg::* ;
                     end else begin
                         State                          <= Data_Phase;
                         HREADYOUT                      <= 1;
-                        hold_state_counter <= 0;
+                        hold_state_counter             <= 0;
                     end
                 end
 

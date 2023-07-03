@@ -7,9 +7,9 @@ class randNumGen;
         rand bit wait_state_on;
         rand bit [3:0] slave_wait_N;
         rand bit [5:0] RCC_BUFFER_LENGTH;
-        rand bit wait_in_data_on;
-        rand bit [3:0] slave_wait_in_data_N;
-        rand bit [2:0] slave_wait_in_data_index;
+        rand bit hold_state_on;
+        rand bit [3:0] slave_hold_N;
+        rand bit [2:0] slave_hold_index;
         rand bit burst_type;
         rand bit [10:0] RCC_DMA_ADDR_LOW;
 endclass
@@ -141,12 +141,12 @@ begin
                 i_HOLD_STATE_ON   <= 0;
                 i_HOLD_STATE_N    <= 0;
             end else begin 
-                if (randNumGen_Int.slave_wait_in_data_N[0] == 0) begin 
+                if (randNumGen_Int.slave_hold_N[0] == 0) begin 
                     i_HOLD_STATE_ON   <= 0;
                     i_HOLD_STATE_N    <= 0;
                 end else begin 
-                    i_HOLD_STATE_ON   <= randNumGen_Int.wait_in_data_on;
-                    i_HOLD_STATE_N    <= randNumGen_Int.slave_wait_in_data_N;
+                    i_HOLD_STATE_ON   <= randNumGen_Int.hold_state_on;
+                    i_HOLD_STATE_N    <= randNumGen_Int.slave_hold_N;
                 end
             end
         end
@@ -156,10 +156,10 @@ begin
         @(posedge HCLK)
         begin
             if (i_HOLD_STATE_ON != 0) 
-                if (randNumGen_Int.slave_wait_in_data_index >= RCC_BUFFER_LENGTH_IN_WORDS -1)
+                if (randNumGen_Int.slave_hold_index >= RCC_BUFFER_LENGTH_IN_WORDS -1)
                     i_HOLD_STATE_INDEX <= RCC_BUFFER_LENGTH_IN_WORDS - 2;
                 else 
-                    i_HOLD_STATE_INDEX <= randNumGen_Int.slave_wait_in_data_index;
+                    i_HOLD_STATE_INDEX <= randNumGen_Int.slave_hold_index;
             else  
                 i_HOLD_STATE_INDEX <= 0;
 
