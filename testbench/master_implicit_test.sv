@@ -5,7 +5,7 @@ import ahb3lite_pkg::* ;
 
 class randNumGen;
         rand bit wait_state_on;
-        rand bit [3:0] slave_wait_N;
+        rand bit [14:0] slave_wait_N;
         rand bit [5:0] RCC_BUFFER_LENGTH;
         rand bit hold_state_on;
         rand bit [3:0] slave_hold_N;
@@ -46,7 +46,7 @@ module test_master();
 
         logic           i_ReadyOn;
         logic           i_WAIT_STATE_ON;
-        logic           [3:0]  i_WAIT_STATE_N;
+        logic           [15:0]  i_WAIT_STATE_N;
 
         logic           i_HOLD_STATE_ON;
         logic           [3:0]  i_HOLD_STATE_N;

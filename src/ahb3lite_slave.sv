@@ -28,20 +28,20 @@ import ahb3lite_pkg::* ;
   
     node_state State;
     
-    logic [3:0] wait_state_counter;
+    logic [15:0] wait_state_counter;
     logic [7:0] data_state_counter;
     logic [3:0] hold_state_counter;
 
     logic ReadyOn;
     logic WAIT_STATE_ON;
-    logic [3:0] WAIT_STATE_N;
+    logic [15:0] WAIT_STATE_N;
 
     logic HOLD_STATE_ON;
     logic [3:0] HOLD_STATE_N;
     logic [2:0] HOLD_STATE_INDEX;
 
     task  Configure_Slave(input logic i_ReadyOn, input logic i_WAIT_STATE_ON, input  logic i_HOLD_STATE_ON, 
-    input logic [3:0] i_WAIT_STATE_N, input logic [3:0] i_HOLD_STATE_N, input logic [2:0] i_HOLD_STATE_INDEX);
+    input logic [15:0] i_WAIT_STATE_N, input logic [3:0] i_HOLD_STATE_N, input logic [2:0] i_HOLD_STATE_INDEX);
         ReadyOn           <= i_ReadyOn;
         WAIT_STATE_ON     <= i_WAIT_STATE_ON;
         WAIT_STATE_N      <= i_WAIT_STATE_N;
