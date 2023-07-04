@@ -169,7 +169,7 @@ module ahb3lite_master(
             case(State)
                 Address_Phase: begin
                     if ((HTRANS == NONSEQ && HBURST == INCR) || (HTRANS == NONSEQ && HBURST == SINGLE && RCC_Words_N > 1) )
-                        temp_addr <= i_HADDR + 4;
+                        temp_addr <= i_HADDR - 1;
                     else 
                         temp_addr <= i_HADDR;
                 end
@@ -177,9 +177,9 @@ module ahb3lite_master(
                 Data_Phase: begin
                     if (HREADY == 1)
                         if (HTRANS == SEQ && HBURST == INCR) 
-                            temp_addr <= temp_addr + 4;   
+                            temp_addr <= temp_addr - 1;   
                         else if (HTRANS == NONSEQ && HBURST == SINGLE && RCC_Words_CNT != 0) 
-                            temp_addr <= temp_addr + 4;   
+                            temp_addr <= temp_addr - 1;   
                         else 
                             temp_addr <= temp_addr;
                     else

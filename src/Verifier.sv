@@ -58,7 +58,7 @@ module Verifier(
                 Verifier_CHECK : begin 
                     if  (i_Reader_FIFO_rd_en == 1) begin
                         DMA_READ      <= 1;
-                        DMA_READ_addr <= DMA_READ_addr + 4;
+                        DMA_READ_addr <= DMA_READ_addr - 1;
 
                     end else begin
                         DMA_READ      <= 0; 
@@ -126,16 +126,16 @@ module Verifier(
                 if (i_serialized_output_valid == 1) 
                     case (Serialize_Counter)
                         0 : begin
-                            data_error = (i_serialized_output != internal_HRDATA[7:0]) ? 1 : 0;
+                            data_error = (i_serialized_output != internal_HRDATA[31:24]) ? 1 : 0;
                         end
                         1 : begin
-                            data_error = (i_serialized_output != internal_HRDATA[15:8]) ? 1 : 0;
-                        end
-                        2 : begin
                             data_error = (i_serialized_output != internal_HRDATA[23:16]) ? 1 : 0;
                         end
+                        2 : begin
+                            data_error = (i_serialized_output != internal_HRDATA[15:8]) ? 1 : 0;
+                        end
                         3 :begin
-                            data_error = (i_serialized_output != internal_HRDATA[31:24]) ? 1 : 0;
+                            data_error = (i_serialized_output != internal_HRDATA[7:0]) ? 1 : 0;
                         end
                     endcase 
                 else

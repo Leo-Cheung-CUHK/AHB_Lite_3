@@ -16,14 +16,17 @@ module FIFO_Reader_Helper(
     output logic         [7:0] serialized_output,
     output logic         serialized_output_valid,
 
-    output logic         [1:0] Serialize_Counter,
-    output logic         [15:0] Bytes_Counter
+    output logic         [1:0]  Serialize_Counter,
+    output logic         [15:0] Bytes_Counter,
+    output logic         [15:0] RCC_BYTE_CNT
     );
 
     FIFO_Reader_Help_state    State;
 
     logic                [15:0] Words_Counter;
     logic                [15:0] RCC_Words_N;
+
+    assign RCC_BYTE_CNT = (serialized_output_valid == 1) ? (i_RCC_BUFFER_LENGTH - Bytes_Counter) : 0;
 
     always_ff@(posedge CLK) begin
         if (!RESETn) begin
@@ -90,22 +93,22 @@ module FIFO_Reader_Helper(
             Helper_READ : begin
                 case (Serialize_Counter)
                         0: begin
-                            serialized_output = i_FIFO_dout[7:0];
+                            serialized_output = i_FIFO_dout[31:24];
                             o_FIFO_rd_en  = 0;
                         end 
 
                         1: begin
-                            serialized_output = i_FIFO_dout[15:8];
-                            o_FIFO_rd_en  = 0;
-                        end 
-
-                        2: begin
                             serialized_output = i_FIFO_dout[23:16];
                             o_FIFO_rd_en  = 0;
                         end 
 
+                        2: begin
+                            serialized_output = i_FIFO_dout[15:8];
+                            o_FIFO_rd_en  = 0;
+                        end 
+
                         3: begin
-                            serialized_output = i_FIFO_dout[31:24];
+                            serialized_output = i_FIFO_dout[7:0];
                             o_FIFO_rd_en  = 1;
                         end 
                 endcase

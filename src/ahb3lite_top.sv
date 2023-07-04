@@ -9,7 +9,8 @@ module ahb3lite_top(
                 output  logic           [7:0] O_serialized_output,
                 output  logic           O_serialized_output_valid,
                 output  logic           [1:0] O_Serialize_Counter,
-                output  logic           [15:0] O_Bytes_Counter
+                output  logic           [15:0] O_Bytes_Counter,
+                output  logic           [15:0] O_RCC_BYTE_CNT
 );
                 logic                   SystemStart;
 
@@ -106,7 +107,8 @@ FIFO_Reader_Helper  FIFO_Reader_Helper_1 (
                         .serialized_output(O_serialized_output),
                         .serialized_output_valid(O_serialized_output_valid),
                         .Serialize_Counter(O_Serialize_Counter),
-                        .Bytes_Counter(O_Bytes_Counter)
+                        .Bytes_Counter(O_Bytes_Counter),
+                        .RCC_BYTE_CNT(O_RCC_BYTE_CNT)
 );
 
 async_fifo  FIFO_Master_Side_1(
