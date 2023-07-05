@@ -21,9 +21,11 @@ import ahb3lite_pkg::* ;
                 input logic HWRITE,
                 
                 // Memory signals
-                output logic  mem_read_flag,
                 output logic [31:0] mem_WR_addr, 
-                input  logic [31:0] HRDATA_fromMem                
+                output logic  mem_read_flag,
+                output logic  mem_write_flag,
+                input  logic [31:0] HRDATA_fromMem,
+                output logic [31:0] HWDATA_toMem            
     );
   
     node_state State;
@@ -174,17 +176,22 @@ import ahb3lite_pkg::* ;
         case(State)
             Idle, Address_Phase, Wait_State: begin
                 mem_read_flag     = 0;
+                mem_write_flag    = 0;
             end 
             
             Data_Phase: begin 
-                if(HWRITE == 1)
-                    mem_read_flag = 0;
-                else 
-                    mem_read_flag = 1;
+                if(HWRITE == 1) begin 
+                    mem_read_flag  = 0;
+                    mem_write_flag = 1;
+                end else begin 
+                    mem_read_flag  = 1;
+                    mem_write_flag = 0;
+                end
             end 
 
             default: begin
                 mem_read_flag     = 0;
+                mem_write_flag    = 0;
             end
 
         endcase

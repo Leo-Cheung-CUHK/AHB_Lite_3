@@ -28,13 +28,15 @@ module ahb3lite_top(
                 HTRANS_state            HTRANS;
                 logic                   [1:0]   HSEL;
 
-                logic                   mem_write_flag;
-                logic                   mem_read_flag;
                 logic                   [31:0] mem_WR_addr;
+                logic                   mem_read_flag;
+                logic                   mem_write_flag;
                 logic                   [31:0]  HRDATA_fromMem;
-                
+                logic                   [31:0]  HWDATA_toMem;
+
                 logic                   [31:0]  o_HRDATA;
                 logic                   o_HRDATA_En;
+
                 //CPU Signals
                 logic                   NewCommandOn;
                 logic                   o_FIFO_rd_en;
@@ -188,18 +190,24 @@ ahb3lite_slave slave (
                         .HTRANS(HTRANS),
                         .HWRITE(HWRITE), 
 
-                        .mem_read_flag(mem_read_flag),
                         .mem_WR_addr(mem_WR_addr),
-                        .HRDATA_fromMem(HRDATA_fromMem)
+                        .mem_read_flag(mem_read_flag),
+                        .mem_write_flag(mem_write_flag),
+                        .HRDATA_fromMem(HRDATA_fromMem).
+                        .HWDATA_toMem(HRDATA_toMem)
 );
 
 ahb3lite_memory external_memory(
-                        .read_flag(mem_read_flag),
-                        .WR_addr(mem_WR_addr),
-                        .HRDATA(HRDATA_fromMem),
 
-                        .read_flag_1(verifier_DMA_READ_Flag),
-                        .WR_addr_1(verifier_DMA_READ_Addr),
-                        .HRDATA_1(verifier_DMA_READ_Data)
+                        .WR_addr(mem_WR_addr),
+                        .read_flag(mem_read_flag),
+                        .write_flag(mem_write_flag),
+                        .HRDATA(HRDATA_fromMem),
+                        .HWDATA(HRDATA_toMem),
+
+                        // Below ports are for verifier
+                        .monitor_flag(verifier_DMA_READ_Flag),
+                        .monitor_addr(verifier_DMA_READ_Addr),
+                        .monitor_DATA(verifier_DMA_READ_Data)
 );
 endmodule

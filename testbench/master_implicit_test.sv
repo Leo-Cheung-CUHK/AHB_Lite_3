@@ -34,7 +34,7 @@ module test_master();
 
         logic           [15:0] O_RCC_BYTE_CNT; // [15:6] - reserved 
 
-        // DMA-related Register 
+        // DMA-related Registers 
         logic           [15:0] RCC_BUFFER_LENGTH;  // [15:6] - reserved 
         logic           [15:0] RCC_DMA_ADDR_HIGH;
         logic           [15:0] RCC_DMA_ADDR_LOW;
@@ -123,8 +123,6 @@ begin
             top_ahb.external_memory.MemoryClass_init.randomize();
         end
 
-        // @(posedge HCLK);
-
         @(posedge HCLK)
         begin
             i_ReadyOn <= 1;
@@ -143,14 +141,10 @@ begin
                 RCC_BUFFER_LENGTH <= randNumGen_Int.RCC_BUFFER_LENGTH;
         end
 
-        // @(posedge HCLK);
-
         @(posedge HCLK) begin
             RCC_BUFFER_LENGTH_IN_WORDS  = ((RCC_BUFFER_LENGTH[0] | RCC_BUFFER_LENGTH[1]) == 0)?
             (RCC_BUFFER_LENGTH >> 2) : (RCC_BUFFER_LENGTH >> 2) + 1;
         end
-
-        // @(posedge HCLK);
 
         @(posedge HCLK)
         begin
@@ -167,8 +161,6 @@ begin
                 end
             end
         end
-
-        // @(posedge HCLK);
 
         @(posedge HCLK)
         begin
@@ -193,15 +185,10 @@ begin
             i_FIFO_prog_full_thresh  <= 30;
         end
 
-        // @(posedge HCLK);
-
         top_ahb.configure_FIFO(i_FIFO_prog_empty_thresh, i_FIFO_prog_full_thresh);  
         top_ahb.master.Configure_Master(HBURST);
         top_ahb.slave.Configure_Slave(i_ReadyOn, i_WAIT_STATE_ON, i_HOLD_STATE_ON,
         i_WAIT_STATE_N, i_HOLD_STATE_N, i_HOLD_STATE_INDEX);
-
-        // @(posedge HCLK);
-
         top_ahb.CPU_Module.CPU_Reg_Write(RCC_DMA_ADDR_HIGH,RCC_DMA_ADDR_LOW,RCC_BUFFER_LENGTH);
 
         @(posedge HCLK)
