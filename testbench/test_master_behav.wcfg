@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="test_master_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="\$unit_ahb3lite_package_sv " />
+            <top_module name="ahb3lite_pkg" />
+            <top_module name="glbl" />
+            <top_module name="test_master" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="252018646355fs"></ZoomStartTime>
+      <ZoomEndTime time="252622146356fs"></ZoomEndTime>
+      <Cursor1Time time="252318146355fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="234"></NameColumnWidth>
+      <ValueColumnWidth column_width="134"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="46" />
+   <wvobject type="logic" fp_name="/test_master/top_ahb/master/HRESETn">
+      <obj_property name="ElementShortName">HRESETn</obj_property>
+      <obj_property name="ObjectShortName">HRESETn</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/top_ahb/master/HCLK">
+      <obj_property name="ElementShortName">HCLK</obj_property>
+      <obj_property name="ObjectShortName">HCLK</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/i_SystemStart">
+      <obj_property name="ElementShortName">i_SystemStart</obj_property>
+      <obj_property name="ObjectShortName">i_SystemStart</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/master/State">
+      <obj_property name="ElementShortName">State[2:0]</obj_property>
+      <obj_property name="ObjectShortName">State[2:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/master/HTRANS">
+      <obj_property name="ElementShortName">HTRANS[1:0]</obj_property>
+      <obj_property name="ObjectShortName">HTRANS[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/master/HADDR">
+      <obj_property name="ElementShortName">HADDR[31:0]</obj_property>
+      <obj_property name="ObjectShortName">HADDR[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/master/HRDATA">
+      <obj_property name="ElementShortName">HRDATA[31:0]</obj_property>
+      <obj_property name="ObjectShortName">HRDATA[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/top_ahb/master/HWRITE">
+      <obj_property name="ElementShortName">HWRITE</obj_property>
+      <obj_property name="ObjectShortName">HWRITE</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/top_ahb/master/HREADY">
+      <obj_property name="ElementShortName">HREADY</obj_property>
+      <obj_property name="ObjectShortName">HREADY</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/master/HBURST">
+      <obj_property name="ElementShortName">HBURST[3:0]</obj_property>
+      <obj_property name="ObjectShortName">HBURST[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/test_master/top_ahb/master/HRESP">
+      <obj_property name="ElementShortName">HRESP</obj_property>
+      <obj_property name="ObjectShortName">HRESP</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/master/RCC_Words_CNT">
+      <obj_property name="ElementShortName">RCC_Words_CNT[5:0]</obj_property>
+      <obj_property name="ObjectShortName">RCC_Words_CNT[5:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/master/RCC_Words_N">
+      <obj_property name="ElementShortName">RCC_Words_N[5:0]</obj_property>
+      <obj_property name="ObjectShortName">RCC_Words_N[5:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/slave/data_state_counter">
+      <obj_property name="ElementShortName">data_state_counter[7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_state_counter[7:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/slave/State">
+      <obj_property name="ElementShortName">State[2:0]</obj_property>
+      <obj_property name="ObjectShortName">State[2:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/master/HSIZE">
+      <obj_property name="ElementShortName">HSIZE[2:0]</obj_property>
+      <obj_property name="ObjectShortName">HSIZE[2:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/slave/wait_state_counter">
+      <obj_property name="ElementShortName">wait_state_counter[3:0]</obj_property>
+      <obj_property name="ObjectShortName">wait_state_counter[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/top_ahb/external_memory/read_flag">
+      <obj_property name="ElementShortName">read_flag</obj_property>
+      <obj_property name="ObjectShortName">read_flag</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/external_memory/WR_addr">
+      <obj_property name="ElementShortName">WR_addr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">WR_addr[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/external_memory/HRDATA">
+      <obj_property name="ElementShortName">HRDATA[31:0]</obj_property>
+      <obj_property name="ObjectShortName">HRDATA[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/i_ReadyOn">
+      <obj_property name="ElementShortName">i_ReadyOn</obj_property>
+      <obj_property name="ObjectShortName">i_ReadyOn</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/i_WAIT_STATE_N">
+      <obj_property name="ElementShortName">i_WAIT_STATE_N[3:0]</obj_property>
+      <obj_property name="ObjectShortName">i_WAIT_STATE_N[3:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/RCC_BUFFER_LENGTH">
+      <obj_property name="ElementShortName">RCC_BUFFER_LENGTH[5:0]</obj_property>
+      <obj_property name="ObjectShortName">RCC_BUFFER_LENGTH[5:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/RCC_DMA_ADDR_HIGH">
+      <obj_property name="ElementShortName">RCC_DMA_ADDR_HIGH[15:0]</obj_property>
+      <obj_property name="ObjectShortName">RCC_DMA_ADDR_HIGH[15:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/RCC_DMA_ADDR_LOW">
+      <obj_property name="ElementShortName">RCC_DMA_ADDR_LOW[15:0]</obj_property>
+      <obj_property name="ObjectShortName">RCC_DMA_ADDR_LOW[15:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/top_ahb/FIFO_wr_en">
+      <obj_property name="ElementShortName">FIFO_wr_en</obj_property>
+      <obj_property name="ObjectShortName">FIFO_wr_en</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/top_ahb/master/Master_Done">
+      <obj_property name="ElementShortName">Master_Done</obj_property>
+      <obj_property name="ObjectShortName">Master_Done</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/FIFO_din">
+      <obj_property name="ElementShortName">FIFO_din[31:0]</obj_property>
+      <obj_property name="ObjectShortName">FIFO_din[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/FIFO_data_count">
+      <obj_property name="ElementShortName">FIFO_data_count[5:0]</obj_property>
+      <obj_property name="ObjectShortName">FIFO_data_count[5:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/top_ahb/FIFO_rd_en">
+      <obj_property name="ElementShortName">FIFO_rd_en</obj_property>
+      <obj_property name="ObjectShortName">FIFO_rd_en</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/FIFO_dout">
+      <obj_property name="ElementShortName">FIFO_dout[31:0]</obj_property>
+      <obj_property name="ObjectShortName">FIFO_dout[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/top_ahb/FIFO_full">
+      <obj_property name="ElementShortName">FIFO_full</obj_property>
+      <obj_property name="ObjectShortName">FIFO_full</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/top_ahb/FIFO_empty">
+      <obj_property name="ElementShortName">FIFO_empty</obj_property>
+      <obj_property name="ObjectShortName">FIFO_empty</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/SLOW_CLK">
+      <obj_property name="ElementShortName">SLOW_CLK</obj_property>
+      <obj_property name="ObjectShortName">SLOW_CLK</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/top_ahb/FIFO_Reader_Helper_1/Read_Request">
+      <obj_property name="ElementShortName">Read_Request</obj_property>
+      <obj_property name="ObjectShortName">Read_Request</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/FIFO_Reader_Helper_1/i_RCC_BUFFER_LENGTH">
+      <obj_property name="ElementShortName">i_RCC_BUFFER_LENGTH[5:0]</obj_property>
+      <obj_property name="ObjectShortName">i_RCC_BUFFER_LENGTH[5:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/test_master/top_ahb/FIFO_Reader_Helper_1/State">
+      <obj_property name="ElementShortName">State</obj_property>
+      <obj_property name="ObjectShortName">State</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/O_serialized_output_valid">
+      <obj_property name="ElementShortName">O_serialized_output_valid</obj_property>
+      <obj_property name="ObjectShortName">O_serialized_output_valid</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/O_serialized_output">
+      <obj_property name="ElementShortName">O_serialized_output[7:0]</obj_property>
+      <obj_property name="ObjectShortName">O_serialized_output[7:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/O_Bytes_Counter">
+      <obj_property name="ElementShortName">O_Bytes_Counter[15:0]</obj_property>
+      <obj_property name="ObjectShortName">O_Bytes_Counter[15:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/FIFO_Reader_Helper_1/Words_Counter">
+      <obj_property name="ElementShortName">Words_Counter[15:0]</obj_property>
+      <obj_property name="ObjectShortName">Words_Counter[15:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/O_Serialize_Counter">
+      <obj_property name="ElementShortName">O_Serialize_Counter[1:0]</obj_property>
+      <obj_property name="ObjectShortName">O_Serialize_Counter[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/Test_N">
+      <obj_property name="ElementShortName">Test_N[63:0]</obj_property>
+      <obj_property name="ObjectShortName">Test_N[63:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_master/top_ahb/Verifier_1/State">
+      <obj_property name="ElementShortName">State[1:0]</obj_property>
+      <obj_property name="ObjectShortName">State[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/top_ahb/Verifier_1/len_error">
+      <obj_property name="ElementShortName">len_error</obj_property>
+      <obj_property name="ObjectShortName">len_error</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_master/top_ahb/Verifier_1/data_error">
+      <obj_property name="ElementShortName">data_error</obj_property>
+      <obj_property name="ObjectShortName">data_error</obj_property>
+   </wvobject>
+</wave_config>

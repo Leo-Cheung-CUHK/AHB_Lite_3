@@ -219,7 +219,7 @@ begin
             i_Read_Request <= 1;
         end
 
-        @(posedge top_ahb.FIFO_Reader_Helper_1.State)
+        @(posedge top_ahb.O_serialized_output_valid)
         begin
             i_Read_Request <= 0;
         end
