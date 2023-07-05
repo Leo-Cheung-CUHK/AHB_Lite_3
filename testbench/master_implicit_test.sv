@@ -5,14 +5,14 @@ import ahb3lite_pkg::* ;
 
 class randNumGen;
         rand bit wait_state_on;
-        rand bit [14:0] slave_wait_N;
-        rand bit [5:0] RCC_BUFFER_LENGTH;
+        randc bit [14:0] slave_wait_N;
+        randc bit [5:0] RCC_BUFFER_LENGTH;
         rand bit hold_state_on;
-        rand bit [3:0] slave_hold_N;
-        rand bit [2:0] slave_hold_index;
+        randc bit [3:0] slave_hold_N;
+        randc bit [2:0] slave_hold_index;
         rand bit burst_type;
-        rand bit [10:0] RCC_DMA_ADDR_LOW;
-        rand bit [15:0] RCC_DMA_ADDR_HIGH;
+        randc bit [10:0] RCC_DMA_ADDR_LOW;
+        randc bit [15:0] RCC_DMA_ADDR_HIGH;
 
 endclass
 
