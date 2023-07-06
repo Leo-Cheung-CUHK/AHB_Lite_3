@@ -21,11 +21,11 @@
 import ahb3lite_pkg::* ;
 
 
-module CPU_Registers(
+module Register_Updater(
     input  bit           HCLK,
     input  logic         HRESETn,
 
-    input  logic         SystemStart,
+    input  logic         CoreSystemStart,
     input  logic         Master_Done,
 
     output logic        NewCommandOn,
@@ -65,7 +65,7 @@ module CPU_Registers(
 
         end else begin
             if (NewCommandFlag == 1) begin 
-                if (SystemStart == 1) begin
+                if (CoreSystemStart == 1) begin
                     NewCommandFlag      <= 0;
                     NewCommandOn        <= 1;
 

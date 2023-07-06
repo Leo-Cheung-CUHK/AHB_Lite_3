@@ -22,9 +22,14 @@ module ahb3lite_memory(
 
     // Read Data from Memory to slave
     assign HRDATA       = (read_flag == 1)? MemoryClass_init.Memory[WR_addr]: 0;
-    // Write Data to Memory
-    assign MemoryClass_init.Memory[WR_addr] = (write_flag == 1)? HWDATA: 0;
+    
     // Read Data from Memory to verifier
     assign monitor_DATA = (monitor_flag == 1)? MemoryClass_init.Memory[monitor_addr]: 0;
+    
+
+    always_comb begin
+       // Write Data to Memory
+       MemoryClass_init.Memory[WR_addr] = (write_flag == 1)? HWDATA: 0;         
+    end
 
 endmodule

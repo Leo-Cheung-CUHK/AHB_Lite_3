@@ -1,13 +1,13 @@
 import ahb3lite_pkg::* ;
 
-module ahb3lite_master(
+module CoreSystemDMA_master(
 
             // AHB protocol inputs and ouptuts
                 input bit           HCLK,
                 input logic         HRESETn,
 
-                input  logic        i_SystemStart,
-                output logic        SystemStart,
+                input  logic        i_CoreSystemStart,
+                output logic        CoreSystemStart,
 
                 // To/From Slave
                 input logic         HREADY,
@@ -47,7 +47,7 @@ module ahb3lite_master(
 
     node_state State = Idle;
 
-    assign  SystemStart = i_SystemStart;
+    assign  CoreSystemStart = i_CoreSystemStart;
     assign  o_HRDATA  = HRDATA;
     assign  o_HRDATA_En = HRDATA_En;
     assign  RCC_Words_N  = ((RCC_BUFFER_LENGTH[0] | RCC_BUFFER_LENGTH[1]) == 0)?
@@ -71,7 +71,7 @@ module ahb3lite_master(
                     Master_Done   <= 0;
                     i_HADDR       <= 0;
 
-                    if (i_SystemStart == 1)  
+                    if (i_CoreSystemStart == 1)  
                         State <= GetReady;
                     else  
                         State <= Idle;

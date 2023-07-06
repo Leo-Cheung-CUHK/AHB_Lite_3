@@ -1,12 +1,12 @@
 import ahb3lite_pkg::* ;
 
-    module ahb3lite_slave
+    module CPUDMA_slave
     (
                 // Global signals       
                 input bit HCLK,
                 input logic HRESETn,
 
-                input logic SystemStart,
+                input logic CoreSystemStart,
 
                 // To/From Master
                 output logic HREADYOUT,
@@ -20,6 +20,8 @@ import ahb3lite_pkg::* ;
                 input HTRANS_state HTRANS,
                 input logic HWRITE,
                 
+                input logic [31:0] HWDATA,
+
                 // Memory signals
                 output logic [31:0] mem_WR_addr, 
                 output logic  mem_read_flag,
@@ -42,19 +44,14 @@ import ahb3lite_pkg::* ;
     logic [3:0] HOLD_STATE_N;
     logic [2:0] HOLD_STATE_INDEX;
 
-    task  Configure_Slave(input logic i_ReadyOn, input logic i_WAIT_STATE_ON, input  logic i_HOLD_STATE_ON, 
-    input logic [15:0] i_WAIT_STATE_N, input logic [3:0] i_HOLD_STATE_N, input logic [2:0] i_HOLD_STATE_INDEX);
+    task  Configure_Slave(input logic i_ReadyOn, input logic i_WAIT_STATE_ON, 
+    input logic [15:0] i_WAIT_STATE_N);
         ReadyOn           <= i_ReadyOn;
         WAIT_STATE_ON     <= i_WAIT_STATE_ON;
         WAIT_STATE_N      <= i_WAIT_STATE_N;
-
-        HOLD_STATE_ON     <= i_HOLD_STATE_ON;
-        HOLD_STATE_N      <= i_HOLD_STATE_N;
-        HOLD_STATE_INDEX  <= i_HOLD_STATE_INDEX;
     endtask 
 
-    assign HRDATA = (mem_read_flag == 1) ? HRDATA_fromMem : 0;
-    assign HRDATA_En = mem_read_flag;
+    assign HWDATA_toMem = (mem_write_flag == 1) ? HWDATA : 0;
 
     always_ff@(posedge HCLK )
     begin
@@ -76,7 +73,7 @@ import ahb3lite_pkg::* ;
 
                     mem_WR_addr        <= 0;
                     HRESP              <= OKAY;
-                    if (SystemStart == 1) begin
+                    if (CoreSystemStart == 1) begin
                         if (ReadyOn == 1) begin
                             State       <= GetReady;
                             HREADYOUT   <= 1;
@@ -122,42 +119,21 @@ import ahb3lite_pkg::* ;
                 Data_Phase: begin  
                     data_state_counter <= data_state_counter + 1;
 
-                    if ((HOLD_STATE_ON == 1) && (data_state_counter == HOLD_STATE_INDEX) ) begin
-                        mem_WR_addr                     <= HADDR;
-                        hold_state_counter  <= 0;
-                        State                           <= Hold_State;
-                        HREADYOUT                       <= 0;
-
-                    end else begin 
-                        if (HBURST == SINGLE) begin
-                            mem_WR_addr     <= HADDR; 
-                            if (HTRANS == NONSEQ) begin
-                                State       <= State;
-                            end else 
-                                State       <= Idle;
-
-                        end else if (HBURST == INCR) begin
-                            mem_WR_addr     <= HADDR; 
-                            if (HTRANS == BUSY) begin
-                                State       <= Idle;
-                                HREADYOUT   <= 0;
-                            end else 
-                                State       <= State;
-                        end else
-                            State           <= State;
-                    end
-                end
-
-                Hold_State: begin   
-                    if (hold_state_counter < HOLD_STATE_N - 1) begin
-                        hold_state_counter <= hold_state_counter + 1;
-                        State                          <= State;
-                        HREADYOUT                      <= 0;
-                    end else begin
-                        State                          <= Data_Phase;
-                        HREADYOUT                      <= 1;
-                        hold_state_counter             <= 0;
-                    end
+                    if (HBURST == SINGLE) begin
+                        mem_WR_addr     <= HADDR; 
+                        if (HTRANS == NONSEQ) begin
+                            State       <= State;
+                        end else 
+                            State       <= Idle;
+                    end else if (HBURST == INCR) begin
+                        mem_WR_addr     <= HADDR; 
+                        if (HTRANS == BUSY) begin
+                            State       <= Idle;
+                            HREADYOUT   <= 0;
+                        end else 
+                            State       <= State;
+                    end else
+                        State           <= State;
                 end
 
                 default: begin

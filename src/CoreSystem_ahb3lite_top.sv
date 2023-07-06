@@ -1,10 +1,10 @@
-module ahb3lite_top(
+module CoreSystem_ahb3lite_top(
                 input   logic           HCLK, 
                 input   logic           HRESETn,
                 input   logic           SLOW_CLK,
                 input   logic           SLOW_RESETn,
                 input   logic           i_Read_Request,
-                input   logic           i_SystemStart,
+                input   logic           i_CoreSystemStart,
 
                 output  logic           [7:0] O_serialized_output,
                 output  logic           O_serialized_output_valid,
@@ -12,7 +12,8 @@ module ahb3lite_top(
                 output  logic           [15:0] O_Bytes_Counter,
                 output  logic           [15:0] O_RCC_BYTE_CNT
 );
-                logic                   SystemStart;
+                // CoreSystem 
+                logic                   CoreSystemStart;
 
                 logic                   [31:0]  HADDR;
                 HBURST_Type             HBURST;
@@ -26,7 +27,6 @@ module ahb3lite_top(
                 logic                   HWRITE;
 
                 HTRANS_state            HTRANS;
-                logic                   [1:0]   HSEL;
 
                 logic                   [31:0] mem_WR_addr;
                 logic                   mem_read_flag;
@@ -73,7 +73,7 @@ assign  FIFO_din    = o_HRDATA;
 assign  FIFO_wr_en  = o_HRDATA_En && ~ FIFO_full;
 assign  FIFO_rd_en  = o_FIFO_rd_en;
 
-Verifier  Verifier_1(
+Verifier  Verifier_0(
                         .CLK(SLOW_CLK),
                         .RESETn(SLOW_RESETn),
 
@@ -94,7 +94,7 @@ Verifier  Verifier_1(
                         .i_HRDATA(verifier_DMA_READ_Data)
 );
 
-FIFO_Reader_Helper  FIFO_Reader_Helper_1 (
+FIFO_Reader_Helper  FIFO_Reader_Helper_0 (
                         .CLK(SLOW_CLK),
                         .RESETn(SLOW_RESETn),
 
@@ -113,7 +113,7 @@ FIFO_Reader_Helper  FIFO_Reader_Helper_1 (
                         .RCC_BYTE_CNT(O_RCC_BYTE_CNT)
 );
 
-async_fifo  FIFO_Master_Side_1(
+async_fifo  FIFO_Master_Side_0(
                         .wreq(FIFO_wr_en),
                         .wclk(HCLK),
                         .wrst_n(HRESETn),
@@ -131,11 +131,13 @@ async_fifo  FIFO_Master_Side_1(
                         .number(FIFO_data_count)
 );
 
-CPU_Registers CPU_Module (
+// This updater updates three global registers:
+//(RCC_BUFFER_LENGTH, RCC_DMA_ADDR_HIGH, RCC_DMA_ADDR_LOW)
+Register_Updater Register_Updater_0 (
                         .HCLK(HCLK),
                         .HRESETn(HRESETn),
 
-                        .SystemStart(SystemStart),
+                        .CoreSystemStart(CoreSystemStart),
                         .Master_Done(Master_Done),
 
                         .NewCommandOn(NewCommandOn),
@@ -144,12 +146,12 @@ CPU_Registers CPU_Module (
                         .o_RCC_DMA_ADDR_LOW(o_RCC_DMA_ADDR_LOW)
 );
 
-ahb3lite_master master(
+CoreSystemDMA_master CoreSystemDMA_master_0(
                         .HCLK(HCLK), 
                         .HRESETn(HRESETn), 
 
-                        .i_SystemStart(i_SystemStart),
-                        .SystemStart(SystemStart),
+                        .i_CoreSystemStart(i_CoreSystemStart),
+                        .CoreSystemStart(CoreSystemStart),
 
                         .HREADY(HREADYOUT), 
                         .HRDATA(HRDATA), 
@@ -173,11 +175,11 @@ ahb3lite_master master(
                         .o_HRDATA_En(o_HRDATA_En)
 );
 
-ahb3lite_slave slave (
+CoreSystemDMA_slave CoreSystemDMA_slave_0 (
                         .HCLK(HCLK), 
                         .HRESETn(HRESETn), 
                         
-                        .SystemStart(SystemStart),
+                        .CoreSystemStart(CoreSystemStart),
 
                         .HREADYOUT(HREADYOUT),
                         .HRDATA(HRDATA), 
@@ -192,13 +194,10 @@ ahb3lite_slave slave (
 
                         .mem_WR_addr(mem_WR_addr),
                         .mem_read_flag(mem_read_flag),
-                        .mem_write_flag(mem_write_flag),
-                        .HRDATA_fromMem(HRDATA_fromMem).
-                        .HWDATA_toMem(HRDATA_toMem)
+                        .HRDATA_fromMem(HRDATA_fromMem)
 );
 
 ahb3lite_memory external_memory(
-
                         .WR_addr(mem_WR_addr),
                         .read_flag(mem_read_flag),
                         .write_flag(mem_write_flag),
