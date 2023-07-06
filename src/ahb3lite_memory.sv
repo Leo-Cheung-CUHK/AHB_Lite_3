@@ -4,12 +4,13 @@ class MemoryClass;
     rand  bit [31:0]  Memory [4096];
 endclass
 
-module ahb3lite_memory(
-
-    input  logic [31:0] WR_addr,
+module ahb3lite_memory(    
+    input  logic [31:0] READ_addr,
     input  logic read_flag,
-    input  logic write_flag,
     output logic [31:0] HRDATA,
+
+    input  logic [31:0] WRITE_addr,
+    input  logic write_flag,
     input  logic [31:0] HWDATA,
 
     input  logic monitor_flag,
@@ -21,15 +22,10 @@ module ahb3lite_memory(
     MemoryClass MemoryClass_init = new;
 
     // Read Data from Memory to slave
-    assign HRDATA       = (read_flag == 1)? MemoryClass_init.Memory[WR_addr]: 0;
+    assign HRDATA       = (read_flag == 1)? MemoryClass_init.Memory[READ_addr]: 0;
     
     // Read Data from Memory to verifier
     assign monitor_DATA = (monitor_flag == 1)? MemoryClass_init.Memory[monitor_addr]: 0;
     
-
-    always_comb begin
-       // Write Data to Memory
-       MemoryClass_init.Memory[WR_addr] = (write_flag == 1)? HWDATA: 0;         
-    end
 
 endmodule

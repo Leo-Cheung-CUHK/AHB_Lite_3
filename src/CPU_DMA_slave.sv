@@ -1,35 +1,27 @@
 import ahb3lite_pkg::* ;
 
-    module CPUDMA_slave
+    module CPU_DMA_slave
     (
                 // Global signals       
                 input bit HCLK,
                 input logic HRESETn,
 
-                input logic CoreSystemStart,
-
-                // To/From Master
-                output logic HREADYOUT,
-                output logic [31:0] HRDATA,
-                output logic HRDATA_En,
-                output HRESP_state HRESP,
-
                 input logic [31:0] HADDR,
+                input logic [31:0] HWDATA,
+                input logic HWRITE,
+
                 input HBURST_Type HBURST,
                 input logic [2:0] HSIZE,
                 input HTRANS_state HTRANS,
-                input logic HWRITE,
-                
-                input logic [31:0] HWDATA,
 
+                output HRESP_state HRESP,
+                output logic HREADY,
+                
                 // Memory signals
                 output logic [31:0] mem_WR_addr, 
-                output logic  mem_read_flag,
                 output logic  mem_write_flag,
-                input  logic [31:0] HRDATA_fromMem,
                 output logic [31:0] HWDATA_toMem            
     );
-  
     node_state State;
     
     logic [15:0] wait_state_counter;
@@ -57,7 +49,7 @@ import ahb3lite_pkg::* ;
     begin
         if (HRESETn == 0) begin
             State              <= Idle;
-            HREADYOUT          <= 0;
+            HREADY          <= 0;
             wait_state_counter <= 0;
             data_state_counter <= 0;
 
@@ -67,22 +59,22 @@ import ahb3lite_pkg::* ;
             case(State)
                 Idle: begin 
                     HRESP <= OKAY;
-                    HREADYOUT          <= 0;
+                    HREADY          <= 0;
                     wait_state_counter <= 0;
                     data_state_counter <= 0;
 
                     mem_WR_addr        <= 0;
                     HRESP              <= OKAY;
-                    if (CoreSystemStart == 1) begin
+                    if (CPU_Start == 1) begin
                         if (ReadyOn == 1) begin
                             State       <= GetReady;
-                            HREADYOUT   <= 1;
+                            HREADY   <= 1;
                         end else
                             State       <= Idle;
 
                     end else begin
                         State           <= Idle;
-                        HREADYOUT       <= 0;
+                        HREADY       <= 0;
                     end
                 end
 
@@ -97,10 +89,10 @@ import ahb3lite_pkg::* ;
 
                     if (WAIT_STATE_ON == 1) begin
                         State           <= Wait_State;
-                        HREADYOUT       <= 0;
+                        HREADY       <= 0;
                     end else begin
                         State           <= Data_Phase;
-                        HREADYOUT       <= 1;
+                        HREADY       <= 1;
                     end
                 end
 
@@ -108,10 +100,10 @@ import ahb3lite_pkg::* ;
                     if (wait_state_counter < WAIT_STATE_N - 1) begin
                         wait_state_counter <= wait_state_counter + 1;
                         State              <= State;
-                        HREADYOUT          <= 0;
+                        HREADY          <= 0;
                     end else begin
                         State              <= Data_Phase;
-                        HREADYOUT          <= 1;
+                        HREADY          <= 1;
                         wait_state_counter <= 0;
                     end
                 end
@@ -129,7 +121,7 @@ import ahb3lite_pkg::* ;
                         mem_WR_addr     <= HADDR; 
                         if (HTRANS == BUSY) begin
                             State       <= Idle;
-                            HREADYOUT   <= 0;
+                            HREADY   <= 0;
                         end else 
                             State       <= State;
                     end else
@@ -138,7 +130,7 @@ import ahb3lite_pkg::* ;
 
                 default: begin
                     State                              <= Idle;
-                    HREADYOUT                          <= 0;
+                    HREADY                          <= 0;
                     wait_state_counter                 <= 0;
                     mem_WR_addr                        <= 0;
                     data_state_counter                 <= 0;

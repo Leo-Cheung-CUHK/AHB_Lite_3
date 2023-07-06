@@ -39,30 +39,20 @@ module test_master();
         // Parameters to be randomized
         HBURST_Type     HBURST; 
 
-        logic           i_ReadyOn;
-        logic           i_WAIT_STATE_ON;
-        logic           [15:0]  i_WAIT_STATE_N;
-
         // Run time counter
         logic           [63 : 0]  Test_N = 0;
 
-CoreSystem_ahb3lite_top CoreSystem_top_ahb(
+test_top test_top(
                         .HCLK(HCLK), 
                         .SLOW_CLK(SLOW_CLK), 
                         .HRESETn(HRESETn), 
                         .SLOW_RESETn(SLOW_RESETn), 
                         .i_CoreSystemStart(i_CoreSystemStart),
-                        .i_Read_Request(i_Read_Request),
-
-                        .O_serialized_output(O_serialized_output),
-                        .O_serialized_output_valid(O_serialized_output_valid),
-                        .O_Serialize_Counter(O_Serialize_Counter),
-                        .O_Bytes_Counter(O_Bytes_Counter),
-                        .O_RCC_BYTE_CNT(O_RCC_BYTE_CNT)
+                        .i_Read_Request(i_Read_Request)
 );
 
-defparam CoreSystem_top_ahb.FIFO_Master_Side_0.DSIZE = 32;
-defparam CoreSystem_top_ahb.FIFO_Master_Side_0.ASIZE = 6;
+defparam test_top.CoreSystem_top_ahb.FIFO_Master_Side_0.DSIZE = 32;
+defparam test_top.CoreSystem_top_ahb.FIFO_Master_Side_0.ASIZE = 6;
 
 randNumGen randNumGen_Int = new();
 
@@ -109,7 +99,7 @@ begin
         @(posedge HCLK)
         begin
             randNumGen_Int.randomize();
-            CoreSystem_top_ahb.external_memory.MemoryClass_init.randomize();
+            test_top.external_memory.MemoryClass_init.randomize();
         end
 
         @(posedge HCLK)
@@ -137,9 +127,14 @@ begin
 
         end
 
-        CoreSystem_top_ahb.CoreSystemDMA_master_0.Configure_Master(HBURST);
-        CoreSystem_top_ahb.CoreSystemDMA_slave_0.Configure_Slave(1'b1, 1'b0, 1'b0);
-        CoreSystem_top_ahb.Register_Updater_0.CPU_Reg_Write(RCC_DMA_ADDR_HIGH,RCC_DMA_ADDR_LOW,RCC_BUFFER_LENGTH);
+        @(posedge HCLK);
+
+        test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Write(1'b1, HBURST, RCC_BUFFER_LENGTH, RCC_DMA_ADDR_HIGH
+        ,RCC_DMA_ADDR_LOW, 32'h1111);
+
+        test_top.CoreSystem_top_ahb.CoreSystemDMA_master_0.Configure_Master(HBURST);
+        test_top.CoreSystem_top_ahb.CoreSystemDMA_slave_0.Configure_Slave(1'b1, 1'b0, 1'b0);
+        test_top.Register_Updater_0.CPU_Reg_Write(RCC_DMA_ADDR_HIGH,RCC_DMA_ADDR_LOW,RCC_BUFFER_LENGTH);
 
         @(posedge HCLK)
         begin
@@ -156,12 +151,12 @@ begin
             i_Read_Request <= 1;
         end
 
-        @(posedge CoreSystem_top_ahb.O_serialized_output_valid)
+        @(posedge test_top.CoreSystem_top_ahb.O_serialized_output_valid)
         begin
             i_Read_Request <= 0;
         end
 
-        @(negedge CoreSystem_top_ahb.FIFO_Reader_Helper_0.State);
+        @(negedge test_top.CoreSystem_top_ahb.FIFO_Reader_Helper_0.State);
 
         repeat(4) @(posedge SLOW_CLK);
     end

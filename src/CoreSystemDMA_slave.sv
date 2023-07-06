@@ -20,8 +20,6 @@ import ahb3lite_pkg::* ;
                 input HTRANS_state HTRANS,
                 input logic HWRITE,
                 
-                input logic [31:0] HWDATA,
-
                 // Memory signals
                 output logic [31:0] mem_WR_addr, 
                 output logic  mem_read_flag,
