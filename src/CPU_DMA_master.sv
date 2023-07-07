@@ -178,7 +178,7 @@ module CPU_DMA_master(
                             temp_addr <= temp_addr - 1;   
                         else 
                             temp_addr <= temp_addr;
-                        temp_data <= i_HWDATA + 1'h1;
+                        temp_data <= temp_data + 1'h1;
                     end else begin
                         temp_addr <= temp_addr;
                         temp_data <= temp_data;

@@ -30,27 +30,27 @@ CPU_DMA_master CPU_DMA_master_0(
                         .HSIZE(HSIZE),
                         .HTRANS(HTRANS),
 
-                        .HREADY(1'b1), 
+                        .HREADY(HREADY), 
                         .HRESP(HRESP)
 );
 
-// CPU_DMA_slave CPU_DMA_slave_0 (
-//                         .HCLK(HCLK), 
-//                         .HRESETn(HRESETn), 
+CPU_DMA_slave CPU_DMA_slave_0 (
+                        .HCLK(HCLK), 
+                        .HRESETn(HRESETn), 
                         
-//                         .HADDR(HADDR), 
-//                         .HWDATA(HWDATA), 
-//                         .HWRITE(HWRITE),
+                        .HADDR(HADDR), 
+                        .HWDATA(HWDATA), 
+                        .HWRITE(HWRITE),
                         
-//                         .HBURST(HBURST), 
-//                         .HSIZE(HSIZE),
-//                         .HTRANS(HTRANS),
+                        .HBURST(HBURST), 
+                        .HSIZE(HSIZE),
+                        .HTRANS(HTRANS),
 
-//                         .HREADY(HREADY),
-//                         .HRESP(HRESP),
+                        .HREADY(HREADY),
+                        .HRESP(HRESP),
 
-//                         .mem_WR_addr(mem_WR_addr),
-//                         .mem_write_flag(mem_write_flag),
-//                         .HWDATA_toMem(HWDATA_toMem)
-// );
+                        .mem_WR_addr(mem_WR_addr),
+                        .mem_write_flag(mem_write_flag),
+                        .HWDATA_toMem(HWDATA_toMem)
+);
 endmodule

@@ -129,6 +129,7 @@ begin
 
         @(posedge HCLK);
 
+        test_top.CPU_top_ahb.CPU_DMA_slave_0.Configure_Slave(1'b1);
         test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Write(1'b1, HBURST, RCC_BUFFER_LENGTH, RCC_DMA_ADDR_HIGH
         ,RCC_DMA_ADDR_LOW, 32'h1111);
 
