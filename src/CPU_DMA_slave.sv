@@ -75,15 +75,15 @@ import ahb3lite_pkg::* ;
                             mem_WR_addr  <= 32'b0; 
                         end
                 
-                    end else if (HBURST == INCR) begin
+                    end else if (HBURST == INCR || HBURST == INCR4 || HBURST == INCR8 || HBURST == INCR16) begin
                         if (HTRANS == SEQ) begin 
                             State       <= State;
                             mem_WR_addr <= HADDR; 
-                        end else if (HTRANS == BUSY || HTRANS == IDLE) begin
+                        end else if (HTRANS == IDLE) begin
                             State       <= Idle;
                             mem_WR_addr <= 32'b0; 
                         end else begin 
-                            State       <= State;
+                            State       <= Idle;
                             mem_WR_addr <= 32'b0; 
                         end 
 

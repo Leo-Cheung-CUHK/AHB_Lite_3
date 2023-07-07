@@ -32,6 +32,13 @@ module CPU_DMA_master(
     logic   [31:0]  i_HWDATA;
     logic   [31:0]  temp_data;
 
+    logic   BUSY_STATE_ON;
+    logic   [15:0] BUSY_STATE_N;
+    logic   [15:0] BUSY_STATE_counter;
+    logic   HOLD_STATE_ON;
+    logic   [15:0] HOLD_STATE_N;
+    logic   [15:0] HOLD_STATE_counter;
+
     task CPU_Write(  
                             input i_CPU_Start,
                             input HBURST_Type i_HBURST, 
@@ -43,7 +50,6 @@ module CPU_DMA_master(
            @(posedge HCLK) begin
                 HSIZE       <= WORD;
                 CPU_Start   <= i_CPU_Start;
-                HBURST      <= i_HBURST;
 
                 RCC_BUFFER_LENGTH <= i_RCC_BUFFER_LENGTH;
                 RCC_DMA_ADDR_HIGH <= i_RCC_DMA_ADDR_HIGH;
@@ -54,22 +60,37 @@ module CPU_DMA_master(
     endtask;
 
     node_state State = Idle;
+
     assign  RCC_Words_N  = ((RCC_BUFFER_LENGTH[0] | RCC_BUFFER_LENGTH[1]) == 0)?
     (RCC_BUFFER_LENGTH >> 2) : (RCC_BUFFER_LENGTH >> 2) + 1;
+    
+    always_comb begin 
+        case (RCC_Words_N)
+            1  : HBURST = SINGLE;
+            4  : HBURST = INCR4;
+            8  : HBURST = INCR8;
+            16 : HBURST = INCR16;
+            default: HBURST = INCR;
+        endcase
+    end
 
     // Maintain state machine
     always_ff@(posedge HCLK)
     begin
         if (HRESETn == 0) begin
-            RCC_Words_CNT <= 0;
-            HSIZE         <= 0;
-            State         <= Idle;
+            RCC_Words_CNT      <= 0;
+            State              <= Idle;
+            BUSY_STATE_ON <= 0;
+            BUSY_STATE_N <= 0;
+            BUSY_STATE_counter <= 0;
 
+            HOLD_STATE_ON <= 0;
+            HOLD_STATE_N <= 0;
+            HOLD_STATE_counter <= 0;
         end else begin
             case(State)
                 Idle: begin 
                     RCC_Words_CNT <= 0;
-                    HSIZE         <= 0;
 
                     if (CPU_Start == 1)  
                         State <= GetReady;
@@ -78,32 +99,78 @@ module CPU_DMA_master(
                 end
 
                 GetReady: begin 
-                    if (HREADY == 1)
+                    if (HREADY == 1) begin 
                         State <= Address_Phase;
-                    else 
+                        BUSY_STATE_ON <= $urandom_range(0,1);
+                        BUSY_STATE_N  <= $urandom_range(1,5);
+                    end else 
                         State <= State;
                 end
 
                 Address_Phase: begin
-                    State         <= Data_Phase;
-                    RCC_Words_CNT <= RCC_Words_N - 1; 
+                    if (BUSY_STATE_ON == 1) begin 
+                        State              <= Wait_State;
+                        BUSY_STATE_counter <= 0;
+
+                    end else begin 
+                        State         <= Data_Phase;
+                        RCC_Words_CNT <= RCC_Words_N - 1; 
+                    end
+                end
+
+                Wait_State : begin 
+                    if (BUSY_STATE_counter == BUSY_STATE_N - 1) begin 
+                        BUSY_STATE_counter <= 0;
+                        State              <= Data_Phase;
+                        RCC_Words_CNT      <= RCC_Words_N - 1; 
+                    end else begin 
+                        BUSY_STATE_counter <= BUSY_STATE_counter + 1;
+                        State              <= State;
+                    end
                 end
 
                 Data_Phase: begin 
                     if (HREADY == 1) begin 
                         if (RCC_Words_CNT == 0) 
-                            State        <= Idle;
-                        else begin
-                            State        <= State; 
+                            State         <= Idle;
+                        else if (HOLD_STATE_ON == 1) begin
+                            State        <= Hold_State;
+                            HOLD_STATE_counter <= 0;
+                            RCC_Words_CNT <= RCC_Words_CNT - 1; 
+                        end else begin
+                            State         <= State; 
                             RCC_Words_CNT <= RCC_Words_CNT - 1; 
                         end 
+
+                        if (RCC_Words_CNT >2) begin 
+                            HOLD_STATE_ON  <= $urandom_range(0,1);
+                            HOLD_STATE_N   <= $urandom_range(1,5);
+                        end 
+
                     end             
+                end
+
+                Hold_State : begin 
+                    if (HOLD_STATE_counter == HOLD_STATE_N - 1) begin 
+                        HOLD_STATE_counter <= 0;
+                        State              <= Data_Phase;
+                    end else begin 
+                        HOLD_STATE_counter <= HOLD_STATE_counter + 1;
+                        State              <= State;
+                    end
                 end
 
                 default: begin
                     State         <= Idle;
                     RCC_Words_CNT <= 0;
-                    HSIZE         <= 0;
+
+                    BUSY_STATE_ON <= 0;
+                    BUSY_STATE_N <= 0;
+                    BUSY_STATE_counter <= 0;
+
+                    HOLD_STATE_ON <= 0;
+                    HOLD_STATE_N <= 0;
+                    HOLD_STATE_counter <= 0;
                 end
             endcase
         end
@@ -127,21 +194,21 @@ module CPU_DMA_master(
             end
 
             Data_Phase: begin
+                if (RCC_Words_CNT == 0) 
+                    HTRANS = IDLE;
+                else
+                    HTRANS = SEQ;
+
+                HWRITE = WRITE;
                 HADDR  = temp_addr;
                 HWDATA = temp_data;
+            end
 
-                if (RCC_Words_N > 1) 
-                    if (HBURST == INCR) 
-                        if  (RCC_Words_CNT == 0)
-                            HTRANS = BUSY;
-                        else
-                            HTRANS = SEQ;
-                            
-                    else if (HBURST == SINGLE)
-                        if  (RCC_Words_CNT == 0)
-                            HTRANS = IDLE;
-                        else
-                            HTRANS = NONSEQ;
+            Wait_State, Hold_State: begin
+                HTRANS = BUSY;
+                HWRITE = WRITE;
+                HADDR  = temp_addr;
+                HWDATA = temp_data;
             end
 
             default: begin
