@@ -28,9 +28,9 @@ import ahb3lite_pkg::* ;
 
     logic [31:0] mem_WR_addr_log;
 
-    task  Configure_Slave(input logic i_ReadyOn);
-        ReadyOn  <= i_ReadyOn;
-    endtask 
+    // task  Configure_Slave(input logic i_ReadyOn);
+    //     ReadyOn  <= i_ReadyOn;
+    // endtask 
 
     assign HWDATA_toMem = (mem_write_flag == 1) ? HWDATA : 0;
 
@@ -47,7 +47,7 @@ import ahb3lite_pkg::* ;
                 Idle: begin 
                     HRESP           <= OKAY;
                     mem_WR_addr     <= 0;
-                    mem_WR_addr_log    <= 0;
+                    mem_WR_addr_log <= 0;
 
                     if (ReadyOn == 1) begin 
                         State       <= GetReady;

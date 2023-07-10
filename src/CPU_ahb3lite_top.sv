@@ -23,6 +23,7 @@ module CPU_ahb3lite_top(
                 logic                   [15:0] RCC_DMA_ADDR_LOW;
 
                 logic                   [31:0] o_init_data;
+                
 CPU_DMA_master CPU_DMA_master_0(
                         .HCLK(HCLK), 
                         .HRESETn(HRESETn), 

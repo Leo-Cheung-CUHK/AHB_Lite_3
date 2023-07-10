@@ -5,8 +5,8 @@
 // endclass
 
 module ahb3lite_memory(    
-                input   logic           HCLK, 
-                input   logic           HRESETn,
+                input  logic HCLK, 
+                input  logic HRESETn,
 
                 input  logic [31:0] READ_addr,
                 input  logic read_flag,

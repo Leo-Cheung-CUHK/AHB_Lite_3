@@ -166,7 +166,6 @@ module CPU_DMA_master(
                             HOLD_STATE_ON  <= $urandom_range(0,1);
                             HOLD_STATE_N   <= $urandom_range(1,5);
                         end 
-
                     end             
                 end
 

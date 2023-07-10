@@ -33,7 +33,7 @@ logic            [31:0]  HRDATA_fromMem;
 
 logic            [31:0] mem_WRITE_addr;
 logic            mem_write_flag;
-logic            [31:0]  HRDATA_toMem;
+logic            [31:0]  HWDATA_toMem;
 
 // Register Updater
 logic            [5:0]  o_RCC_BUFFER_LENGTH;
@@ -53,7 +53,7 @@ assign core_HRDATA_fromMem = HRDATA_fromMem;
 
 assign mem_WRITE_addr = CPU_mem_WRITE_addr;
 assign mem_write_flag = CPU_mem_write_flag;
-assign HRDATA_toMem = CPU_HWDATA_toMem;
+assign HWDATA_toMem = CPU_HWDATA_toMem;
 
 Verifier  Verifier_0(
                         .CLK(SLOW_CLK),
@@ -115,14 +115,14 @@ CPU_ahb3lite_top CPU_top_ahb(
 ahb3lite_memory external_memory(
                         .HCLK(HCLK),
                         .HRESETn(HRESETn),
-                        
+
                         .READ_addr(mem_READ_addr),
                         .read_flag(mem_read_flag),
                         .HRDATA(HRDATA_fromMem),
 
                         .WRITE_addr(mem_WRITE_addr),
                         .write_flag(mem_write_flag),
-                        .HWDATA(HRDATA_toMem),
+                        .HWDATA(HWDATA_toMem),
 
                         // Below ports are for verifier
                         .monitor_flag(verifier_DMA_READ_Flag),
