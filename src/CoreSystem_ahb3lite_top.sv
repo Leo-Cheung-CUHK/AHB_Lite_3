@@ -18,8 +18,6 @@ module CoreSystem_ahb3lite_top(
                 input  logic            [31:0]  HRDATA_fromMem,
 
                 // Register Signals
-                input  logic            NewCommandOn,
-                output logic            Master_Done,
                 input  logic            [5:0]  i_RCC_BUFFER_LENGTH,
                 input  logic            [15:0] i_RCC_DMA_ADDR_HIGH,
                 input  logic            [15:0] i_RCC_DMA_ADDR_LOW,
@@ -28,8 +26,6 @@ module CoreSystem_ahb3lite_top(
                 output logic            o_FIFO_rd_en
 );
                 // CoreSystem 
-                logic                   CoreSystemStart;
-
                 logic                   [31:0]  HADDR;
                 HBURST_Type             HBURST;
                 logic                   [2:0]   HSIZE;
@@ -100,46 +96,43 @@ CoreSystemDMA_master CoreSystemDMA_master_0(
                         .HRESETn(HRESETn), 
 
                         .i_CoreSystemStart(i_CoreSystemStart),
-                        .CoreSystemStart(CoreSystemStart),
-
-                        .HREADY(HREADYOUT), 
-                        .HRDATA(HRDATA), 
-                        .HRDATA_En(HRDATA_En),
-                        .HRESP(HRESP),
 
                         .HADDR(HADDR), 
+                        .HRDATA(HRDATA), 
+                        .HWRITE(HWRITE),
+
                         .HBURST(HBURST), 
                         .HSIZE(HSIZE),
                         .HTRANS(HTRANS),
-                        .HWRITE(HWRITE),
 
-                        .Master_Done(Master_Done),
+                        .HREADY(HREADYOUT), 
+                        .HRESP(HRESP),
 
-                        .NewCommandOn(NewCommandOn),
                         .i_RCC_BUFFER_LENGTH(i_RCC_BUFFER_LENGTH),
                         .i_RCC_DMA_ADDR_HIGH(i_RCC_DMA_ADDR_HIGH),
                         .i_RCC_DMA_ADDR_LOW(i_RCC_DMA_ADDR_LOW),
 
                         .o_HRDATA(o_HRDATA),
-                        .o_HRDATA_En(o_HRDATA_En)
+                        .o_HRDATA_En(o_HRDATA_En),
+                        .HRDATA_En(HRDATA_En)
+
 );
 
 CoreSystemDMA_slave CoreSystemDMA_slave_0 (
                         .HCLK(HCLK), 
                         .HRESETn(HRESETn), 
                         
-                        .CoreSystemStart(CoreSystemStart),
-
-                        .HREADYOUT(HREADYOUT),
-                        .HRDATA(HRDATA), 
-                        .HRDATA_En(HRDATA_En),
-                        .HRESP(HRESP),
-                        
                         .HADDR(HADDR), 
+                        .HRDATA(HRDATA), 
+                        .HWRITE(HWRITE), 
+
                         .HBURST(HBURST) , 
                         .HSIZE(HSIZE),
                         .HTRANS(HTRANS),
-                        .HWRITE(HWRITE), 
+
+                        .HREADYOUT(HREADYOUT),
+                        .HRESP(HRESP),
+                        .HRDATA_En(HRDATA_En),
 
                         .mem_WR_addr(mem_WR_addr),
                         .mem_read_flag(mem_read_flag),

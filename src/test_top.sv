@@ -93,8 +93,6 @@ CoreSystem_ahb3lite_top CoreSystem_top_ahb(
                         .mem_read_flag(core_mem_read_flag),
                         .HRDATA_fromMem(core_HRDATA_fromMem),
 
-                        .NewCommandOn(NewCommandOn),
-                        .Master_Done(CoreSystem_Master_Done),
                         .i_RCC_BUFFER_LENGTH(o_RCC_BUFFER_LENGTH),
                         .i_RCC_DMA_ADDR_HIGH(o_RCC_DMA_ADDR_HIGH),
                         .i_RCC_DMA_ADDR_LOW(o_RCC_DMA_ADDR_LOW),
@@ -135,10 +133,6 @@ ahb3lite_memory external_memory(
 Register_Updater Register_Updater_0 (
                         .HCLK(HCLK),
                         .HRESETn(HRESETn),
-                        .i_CoreSystemStart(i_CoreSystemStart),
-
-                        .NewCommandOn(NewCommandOn),
-                        .CoreSystem_Master_Done(CoreSystem_Master_Done),
 
                         .o_RCC_BUFFER_LENGTH(o_RCC_BUFFER_LENGTH),
                         .o_RCC_DMA_ADDR_HIGH(o_RCC_DMA_ADDR_HIGH),

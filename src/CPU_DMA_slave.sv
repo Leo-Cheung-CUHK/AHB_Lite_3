@@ -23,14 +23,9 @@ import ahb3lite_pkg::* ;
                 output logic [31:0] HWDATA_toMem            
     );
     node_state State;
-    logic ReadyOn;
     logic WAIT_STATE_ON;
 
     logic [31:0] mem_WR_addr_log;
-
-    // task  Configure_Slave(input logic i_ReadyOn);
-    //     ReadyOn  <= i_ReadyOn;
-    // endtask 
 
     assign HWDATA_toMem = (mem_write_flag == 1) ? HWDATA : 0;
 
@@ -38,7 +33,7 @@ import ahb3lite_pkg::* ;
     begin
         if (HRESETn == 0) begin
             State              <= Idle;
-            HREADY             <= 0;
+            HREADY             <= 1;
             mem_WR_addr        <= 0;
             HRESP              <= OKAY;
             mem_WR_addr_log    <= 0;
@@ -46,19 +41,8 @@ import ahb3lite_pkg::* ;
             case(State)
                 Idle: begin 
                     HRESP           <= OKAY;
-                    mem_WR_addr     <= 0;
                     mem_WR_addr_log <= 0;
 
-                    if (ReadyOn == 1) begin 
-                        State       <= GetReady;
-                        HREADY      <= 1;
-                    end else  begin 
-                        State       <= State;
-                        HREADY      <= 0;
-                    end
-                end
-
-                GetReady: begin
                     if (HTRANS == NONSEQ) begin 
                         State       <= Data_Phase;
                         mem_WR_addr <= HADDR; 

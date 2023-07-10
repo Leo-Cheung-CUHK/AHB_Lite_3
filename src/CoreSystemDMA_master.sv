@@ -10,31 +10,30 @@ module CoreSystemDMA_master(
                 output logic        CoreSystemStart,
 
                 // To/From Slave
-                input logic         HREADY,
-                input logic [31:0]  HRDATA,
-                input logic         HRDATA_En,
-                input HRESP_state   HRESP,
-
-                output logic [31:0] HADDR,
-                output HBURST_Type  HBURST,
-                output logic [2:0]  HSIZE,
-                output HTRANS_state HTRANS, 
+                output logic        [31:0] HADDR,
+                input  logic         [31:0] HRDATA,
                 output logic        HWRITE,
-                
-                // To/From CPU Registers
-                input logic         NewCommandOn,
-                input logic         [5:0]  i_RCC_BUFFER_LENGTH,
-                input logic         [15:0] i_RCC_DMA_ADDR_HIGH,
-                input logic         [15:0] i_RCC_DMA_ADDR_LOW,
-                output logic        Master_Done,
 
-                output logic [31:0] o_HRDATA,
-                output logic        o_HRDATA_En
+                output HBURST_Type  HBURST,
+                output logic        [2:0]  HSIZE,
+                output HTRANS_state HTRANS, 
+
+                input  logic         HREADY,
+                input  HRESP_state   HRESP,
+
+                // To/From CPU Registers
+                input  logic         [5:0]  i_RCC_BUFFER_LENGTH,
+                input  logic         [15:0] i_RCC_DMA_ADDR_HIGH,
+                input  logic         [15:0] i_RCC_DMA_ADDR_LOW,
+
+                output logic        [31:0] o_HRDATA,
+
+                input  logic         HRDATA_En,
+                output logic         o_HRDATA_En
     );
 
     logic   [5:0]   RCC_Words_CNT;
     logic   [5:0]   RCC_Words_N;
-    logic   [5:0]   RCC_BUFFER_LENGTH;
     logic   [31:0]  i_HADDR;
     logic   [31:0]  temp_addr;
 
@@ -50,8 +49,8 @@ module CoreSystemDMA_master(
     assign  CoreSystemStart = i_CoreSystemStart;
     assign  o_HRDATA  = HRDATA;
     assign  o_HRDATA_En = HRDATA_En;
-    assign  RCC_Words_N  = ((RCC_BUFFER_LENGTH[0] | RCC_BUFFER_LENGTH[1]) == 0)?
-    (RCC_BUFFER_LENGTH >> 2) : (RCC_BUFFER_LENGTH >> 2) + 1;
+    assign  RCC_Words_N  = ((i_RCC_BUFFER_LENGTH[0] | i_RCC_BUFFER_LENGTH[1]) == 0)?
+    (i_RCC_BUFFER_LENGTH >> 2) : (i_RCC_BUFFER_LENGTH >> 2) + 1;
 
     // Maintain state machine
     always_ff@(posedge HCLK)
@@ -60,7 +59,6 @@ module CoreSystemDMA_master(
             State         <= Idle;
             RCC_Words_CNT <= 0;
             HSIZE         <= 0;
-            Master_Done   <= 0;
             i_HADDR       <= 0;
 
         end else begin
@@ -68,28 +66,15 @@ module CoreSystemDMA_master(
                 Idle: begin 
                     RCC_Words_CNT <= 0;
                     HSIZE         <= 0;
-                    Master_Done   <= 0;
-                    i_HADDR       <= 0;
 
-                    if (i_CoreSystemStart == 1)  
-                        State <= GetReady;
-                    else  
+                    if (i_CoreSystemStart == 1) begin 
+                        i_HADDR <= {i_RCC_DMA_ADDR_HIGH, i_RCC_DMA_ADDR_LOW};
+                        State   <= Address_Phase;
+
+                    end else begin   
+                        i_HADDR <= 0;
                         State <= Idle;
-                end
-
-                GetReady: begin 
-                    if (NewCommandOn == 1) begin
-                        // Update registers information from CPU 
-                        RCC_BUFFER_LENGTH   <= i_RCC_BUFFER_LENGTH;
-                        i_HADDR             <= {i_RCC_DMA_ADDR_HIGH, i_RCC_DMA_ADDR_LOW};
-
-                        if (HREADY == 1)
-                            State <= Address_Phase;
-                        else 
-                            State <= Idle;
-
-                    end else
-                        State <= State;
+                    end
                 end
 
                 Address_Phase: begin
@@ -101,7 +86,6 @@ module CoreSystemDMA_master(
                     if (HREADY == 1) begin 
                         if (RCC_Words_CNT == 0) begin 
                             State        <= Idle; 
-                            Master_Done  <= 1;
 
                         end else begin
                             State        <= State; 
@@ -114,7 +98,6 @@ module CoreSystemDMA_master(
                     State         <= Idle;
                     RCC_Words_CNT <= 0;
                     HSIZE         <= 0;
-                    Master_Done   <= 0;
                     i_HADDR       <= 0;
                 end
             endcase
@@ -124,12 +107,6 @@ module CoreSystemDMA_master(
     // Update status parameters
     always_comb begin
         case (State)
-            GetReady: begin
-                HTRANS = NONSEQ;
-                HWRITE = READ;
-                HADDR  = i_HADDR;
-            end
-
             Address_Phase: begin
                 HTRANS = NONSEQ;
                 HWRITE = READ;

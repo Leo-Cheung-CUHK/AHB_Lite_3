@@ -107,23 +107,16 @@ module CPU_DMA_master(
                 Idle: begin 
                     RCC_Words_CNT <= 0;
 
-                    if (CPU_Start == 1)  
-                        State <= GetReady;
-                    else  
-                        State <= Idle;
-                    CPU_Work     <= 0;
-                end
-
-                GetReady: begin 
-                    if (HREADY == 1) begin 
+                    if (CPU_Start == 1) begin 
                         State <= Address_Phase;
                         BUSY_STATE_ON <= $urandom_range(0,1);
                         BUSY_STATE_N  <= $urandom_range(1,5);
-                        CPU_Work     <= 1;
-                    end else begin 
+                        CPU_Work     <= 1;                        
+                    end else  begin 
+                        State <= Idle;
                         State <= State;
                         CPU_Work     <= 0;
-                    end 
+                    end
                 end
 
                 Address_Phase: begin

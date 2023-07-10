@@ -25,10 +25,6 @@ module Register_Updater(
     input  bit           HCLK,
     input  logic         HRESETn,
 
-    input  logic         i_CoreSystemStart,
-    input  logic         CoreSystem_Master_Done,
-
-    output logic         NewCommandOn,
     output logic  [5:0]  o_RCC_BUFFER_LENGTH,
     output logic  [15:0] o_RCC_DMA_ADDR_HIGH,
     output logic  [15:0] o_RCC_DMA_ADDR_LOW
@@ -61,23 +57,15 @@ module Register_Updater(
             o_RCC_DMA_ADDR_LOW  <= 0;
 
             NewCommandFlag      <= 0;
-            NewCommandOn        <= 0;
 
         end else begin
             if (NewCommandFlag == 1) begin 
-                if (i_CoreSystemStart == 1) begin
                     NewCommandFlag      <= 0;
-                    NewCommandOn        <= 1;
 
                     o_RCC_BUFFER_LENGTH <= RCC_BUFFER_LENGTH;
                     o_RCC_DMA_ADDR_HIGH <= RCC_DMA_ADDR_HIGH;
                     o_RCC_DMA_ADDR_LOW  <= RCC_DMA_ADDR_LOW ;  
-                end else if (CoreSystem_Master_Done == 1) 
-                    NewCommandOn        <= 0;
-                else
-                    NewCommandOn        <= NewCommandOn;            
-            end else 
-                NewCommandOn            <= NewCommandOn; 
+            end
         end
     end
 
