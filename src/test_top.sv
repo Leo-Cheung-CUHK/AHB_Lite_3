@@ -113,6 +113,9 @@ CPU_ahb3lite_top CPU_top_ahb(
 );
 
 ahb3lite_memory external_memory(
+                        .HCLK(HCLK),
+                        .HRESETn(HRESETn),
+                        
                         .READ_addr(mem_READ_addr),
                         .read_flag(mem_read_flag),
                         .HRDATA(HRDATA_fromMem),

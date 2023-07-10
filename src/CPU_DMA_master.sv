@@ -26,6 +26,7 @@ module CPU_DMA_master(
     );
 
     logic   CPU_Start;
+    logic   CPU_Work;
 
     logic   [5:0]  RCC_BUFFER_LENGTH;
     logic   [15:0] RCC_DMA_ADDR_HIGH;
@@ -99,6 +100,8 @@ module CPU_DMA_master(
             HOLD_STATE_ON <= 0;
             HOLD_STATE_N <= 0;
             HOLD_STATE_counter <= 0;
+
+            CPU_Work     <= 0;
         end else begin
             case(State)
                 Idle: begin 
@@ -108,6 +111,7 @@ module CPU_DMA_master(
                         State <= GetReady;
                     else  
                         State <= Idle;
+                    CPU_Work     <= 0;
                 end
 
                 GetReady: begin 
@@ -115,8 +119,11 @@ module CPU_DMA_master(
                         State <= Address_Phase;
                         BUSY_STATE_ON <= $urandom_range(0,1);
                         BUSY_STATE_N  <= $urandom_range(1,5);
-                    end else 
+                        CPU_Work     <= 1;
+                    end else begin 
                         State <= State;
+                        CPU_Work     <= 0;
+                    end 
                 end
 
                 Address_Phase: begin
@@ -143,9 +150,10 @@ module CPU_DMA_master(
 
                 Data_Phase: begin 
                     if (HREADY == 1) begin 
-                        if (RCC_Words_CNT == 0) 
+                        if (RCC_Words_CNT == 0)  begin 
                             State         <= Idle;
-                        else if (HOLD_STATE_ON == 1) begin
+                            CPU_Work      <= 0;
+                        end else if (HOLD_STATE_ON == 1) begin
                             State        <= Hold_State;
                             HOLD_STATE_counter <= 0;
                             RCC_Words_CNT <= RCC_Words_CNT - 1; 
@@ -182,7 +190,10 @@ module CPU_DMA_master(
 
                     HOLD_STATE_ON <= 0;
                     HOLD_STATE_N <= 0;
+                    
                     HOLD_STATE_counter <= 0;
+
+                    CPU_Work      <= 0;
                 end
             endcase
         end
@@ -241,8 +252,8 @@ module CPU_DMA_master(
         end else begin
             case(State)
                 Address_Phase: begin
-                    if ((HTRANS == NONSEQ && HBURST == INCR) || (HTRANS == NONSEQ && HBURST == SINGLE && RCC_Words_N > 1) )
-                        temp_addr <= i_HADDR + 1'b1;
+                    if ((HTRANS == NONSEQ && (HBURST == INCR || HBURST == INCR4 || HBURST == INCR8 || HBURST == INCR16) ) || (HTRANS == NONSEQ && HBURST == SINGLE && RCC_Words_N > 1) )
+                        temp_addr <= i_HADDR - 1;
                     else 
                         temp_addr <= i_HADDR;
 
@@ -251,10 +262,10 @@ module CPU_DMA_master(
 
                 Data_Phase: begin
                     if (HREADY == 1) begin 
-                        if (HTRANS == SEQ && HBURST == INCR) 
-                            temp_addr <= temp_addr + 1'b1;   
+                        if (HTRANS == SEQ && (HBURST == INCR || HBURST == INCR4 || HBURST == INCR8 || HBURST == INCR16)) 
+                            temp_addr <= temp_addr - 1;   
                         else if (HTRANS == NONSEQ && HBURST == SINGLE && RCC_Words_CNT != 0) 
-                            temp_addr <= temp_addr + 1'b1;   
+                            temp_addr <= temp_addr - 1;   
                         else 
                             temp_addr <= temp_addr;
                         temp_data <= temp_data + 1'h1;

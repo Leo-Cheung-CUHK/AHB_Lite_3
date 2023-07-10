@@ -79,8 +79,8 @@ module CPU_Verifier (
                         if (mem_write_flag == 1) begin 
                             len_error     <= 0;
                             len_counter   <= len_counter + 1;
-                            next_expected_data <= next_expected_data + 1'h1;
-                            next_expected_addr <= next_expected_addr + 1'b1;
+                            next_expected_data <= next_expected_data + 1;
+                            next_expected_addr <= next_expected_addr - 1;
                         end else begin
                             len_error     <= 0;
                             len_counter   <= len_counter;

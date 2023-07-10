@@ -9,7 +9,6 @@ class randNumGen;
         randc bit [10:0] RCC_DMA_ADDR_LOW;
         randc bit [15:0] RCC_DMA_ADDR_HIGH;
         randc bit [31:0] RCC_DMA_INIT_DATA;
-
 endclass
 
 module test_master();
@@ -100,7 +99,7 @@ begin
         @(posedge HCLK)
         begin
             randNumGen_Int.randomize();
-            test_top.external_memory.MemoryClass_init.randomize();
+            // test_top.external_memory.MemoryClass_init.randomize();
         end
 
         @(posedge HCLK)
@@ -129,22 +128,24 @@ begin
         end
 
         @(posedge HCLK);
-
         test_top.CPU_top_ahb.CPU_DMA_slave_0.Configure_Slave(1'b1);
-        test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Write(1'b1, HBURST, RCC_BUFFER_LENGTH, RCC_DMA_ADDR_HIGH
-        ,RCC_DMA_ADDR_LOW, randNumGen_Int.RCC_DMA_INIT_DATA);
-
         test_top.CoreSystem_top_ahb.CoreSystemDMA_master_0.Configure_Master(HBURST);
         test_top.CoreSystem_top_ahb.CoreSystemDMA_slave_0.Configure_Slave(1'b1, 1'b0, 1'b0);
         test_top.Register_Updater_0.CPU_Reg_Write(RCC_DMA_ADDR_HIGH,RCC_DMA_ADDR_LOW,RCC_BUFFER_LENGTH);
 
+        test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Write(1'b1, HBURST, RCC_BUFFER_LENGTH, RCC_DMA_ADDR_HIGH
+        ,RCC_DMA_ADDR_LOW, randNumGen_Int.RCC_DMA_INIT_DATA);
 
+        @(posedge HCLK) begin 
+            test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Write(1'b0, HBURST, RCC_BUFFER_LENGTH, RCC_DMA_ADDR_HIGH
+            ,RCC_DMA_ADDR_LOW, randNumGen_Int.RCC_DMA_INIT_DATA);
+        end
+
+        @(negedge test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Work);
 
         @(posedge HCLK)
         begin
             i_CoreSystemStart <= 1;
-            test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Write(1'b0, HBURST, RCC_BUFFER_LENGTH, RCC_DMA_ADDR_HIGH
-            ,RCC_DMA_ADDR_LOW, randNumGen_Int.RCC_DMA_INIT_DATA);
         end
 
         @(posedge HCLK)
