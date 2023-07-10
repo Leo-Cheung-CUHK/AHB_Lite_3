@@ -26,6 +26,8 @@ import ahb3lite_pkg::* ;
     logic ReadyOn;
     logic WAIT_STATE_ON;
 
+    logic [31:0] mem_WR_addr_log;
+
     task  Configure_Slave(input logic i_ReadyOn);
         ReadyOn  <= i_ReadyOn;
     endtask 
@@ -39,11 +41,13 @@ import ahb3lite_pkg::* ;
             HREADY             <= 0;
             mem_WR_addr        <= 0;
             HRESP              <= OKAY;
+            mem_WR_addr_log    <= 0;
         end else begin
             case(State)
                 Idle: begin 
                     HRESP           <= OKAY;
                     mem_WR_addr     <= 0;
+                    mem_WR_addr_log    <= 0;
 
                     if (ReadyOn == 1) begin 
                         State       <= GetReady;
@@ -70,6 +74,9 @@ import ahb3lite_pkg::* ;
                             // SINGLE Busrts
                             State        <= State;
                             mem_WR_addr  <= HADDR; 
+                        end else if (HTRANS == IDLE) begin
+                            State       <= Idle;
+                            mem_WR_addr <= 32'b0; 
                         end else begin 
                             State        <= Idle;
                             mem_WR_addr  <= 32'b0; 
@@ -79,6 +86,10 @@ import ahb3lite_pkg::* ;
                         if (HTRANS == SEQ) begin 
                             State       <= State;
                             mem_WR_addr <= HADDR; 
+                        end else if (HTRANS == BUSY) begin
+                            State           <= BUSY_State;
+                            mem_WR_addr     <= mem_WR_addr; 
+                            mem_WR_addr_log <= HADDR; // save the last address 
                         end else if (HTRANS == IDLE) begin
                             State       <= Idle;
                             mem_WR_addr <= 32'b0; 
@@ -90,13 +101,38 @@ import ahb3lite_pkg::* ;
                     end else begin 
                         State        <= Idle;
                         mem_WR_addr  <= 32'b0; 
+                        mem_WR_addr_log <= 0;
                     end
                 end
 
+                BUSY_State: begin 
+                    if (HTRANS == BUSY) begin
+                        State       <= BUSY_State;
+                        mem_WR_addr     <= mem_WR_addr; 
+                        mem_WR_addr_log <= mem_WR_addr_log;
+                    end else if (HTRANS == SEQ) begin 
+                        State       <= Data_Phase;
+                        mem_WR_addr <= mem_WR_addr_log; 
+                        mem_WR_addr_log <= 0;
+                    end else if (HTRANS == IDLE) begin
+                        State       <= Idle;
+                        mem_WR_addr <= 32'b0; 
+                        mem_WR_addr_log <= 0;
+
+                    end else begin 
+                        State       <= Idle;
+                        mem_WR_addr <= 32'b0; 
+                        mem_WR_addr_log <= 0;
+
+                    end 
+                end
+
                 default: begin
-                    State               <= Idle;
-                    HREADY              <= 1;
-                    mem_WR_addr         <= 0;
+                    State           <= Idle;
+                    HREADY          <= 1;
+                    mem_WR_addr     <= 0;
+                    mem_WR_addr_log <= 0;
+
                 end
             endcase
         end
@@ -106,12 +142,18 @@ import ahb3lite_pkg::* ;
     begin 
         case(State)
             Data_Phase: begin 
-                if(HWRITE == 1) 
+                if(HWRITE == 1 && HTRANS != BUSY) 
                     mem_write_flag = 1;
                 else  
                     mem_write_flag = 0;
             end 
 
+            BUSY_State: begin 
+                if (HTRANS != BUSY)
+                    mem_write_flag = 1;
+                else  
+                    mem_write_flag = 0; 
+            end
             default: begin
                 mem_write_flag    = 0;
             end

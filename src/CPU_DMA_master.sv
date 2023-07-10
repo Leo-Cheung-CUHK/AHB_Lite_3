@@ -15,7 +15,14 @@ module CPU_DMA_master(
                 output HTRANS_state HTRANS, 
 
                 input logic         HREADY,
-                input HRESP_state   HRESP
+                input HRESP_state   HRESP,
+
+                // To Verifier
+                output logic  [5:0]  o_RCC_Words_N,
+                output logic  [15:0] o_RCC_DMA_ADDR_HIGH,
+                output logic  [15:0] o_RCC_DMA_ADDR_LOW,
+
+                output logic  [31:0] o_init_data
     );
 
     logic   CPU_Start;
@@ -56,6 +63,7 @@ module CPU_DMA_master(
                 RCC_DMA_ADDR_LOW  <= i_RCC_DMA_ADDR_LOW;
                 i_HADDR           <= {i_RCC_DMA_ADDR_HIGH, i_RCC_DMA_ADDR_LOW};
                 i_HWDATA          <= random_DATA;
+                o_init_data       <= random_DATA;
            end
     endtask;
 
@@ -63,6 +71,10 @@ module CPU_DMA_master(
 
     assign  RCC_Words_N  = ((RCC_BUFFER_LENGTH[0] | RCC_BUFFER_LENGTH[1]) == 0)?
     (RCC_BUFFER_LENGTH >> 2) : (RCC_BUFFER_LENGTH >> 2) + 1;
+
+    assign o_RCC_Words_N = RCC_Words_N;
+    assign o_RCC_DMA_ADDR_HIGH = RCC_DMA_ADDR_HIGH;
+    assign o_RCC_DMA_ADDR_LOW  = RCC_DMA_ADDR_LOW;
     
     always_comb begin 
         case (RCC_Words_N)
@@ -230,7 +242,7 @@ module CPU_DMA_master(
             case(State)
                 Address_Phase: begin
                     if ((HTRANS == NONSEQ && HBURST == INCR) || (HTRANS == NONSEQ && HBURST == SINGLE && RCC_Words_N > 1) )
-                        temp_addr <= i_HADDR - 1;
+                        temp_addr <= i_HADDR + 1'b1;
                     else 
                         temp_addr <= i_HADDR;
 
@@ -240,9 +252,9 @@ module CPU_DMA_master(
                 Data_Phase: begin
                     if (HREADY == 1) begin 
                         if (HTRANS == SEQ && HBURST == INCR) 
-                            temp_addr <= temp_addr - 1;   
+                            temp_addr <= temp_addr + 1'b1;   
                         else if (HTRANS == NONSEQ && HBURST == SINGLE && RCC_Words_CNT != 0) 
-                            temp_addr <= temp_addr - 1;   
+                            temp_addr <= temp_addr + 1'b1;   
                         else 
                             temp_addr <= temp_addr;
                         temp_data <= temp_data + 1'h1;
@@ -252,6 +264,11 @@ module CPU_DMA_master(
                     end
                 end
                 
+                Wait_State, Hold_State: begin
+                    temp_addr <= temp_addr;
+                    temp_data <= temp_data;
+                end
+
                 default: begin 
                     temp_addr <= 32'b0;
                     temp_data <= 32'b0;
