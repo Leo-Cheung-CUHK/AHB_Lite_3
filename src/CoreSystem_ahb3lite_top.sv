@@ -23,19 +23,24 @@ module CoreSystem_ahb3lite_top(
                 input  logic            [15:0] i_RCC_DMA_ADDR_LOW,
 
                 // Verifier signals
-                output logic            o_FIFO_rd_en
+                output logic            o_FIFO_rd_en,
+
+                // From Switch 
+                input  logic            HREADY
 );
                 // CoreSystem 
                 logic                   [31:0]  HADDR;
+                logic                   [31:0]  HRDATA;
+                logic                   HWRITE;
+
                 HBURST_Type             HBURST;
                 logic                   [2:0]   HSIZE;
-                logic                   HREADY;
-                HRESP_state             HRESP;
-                logic                   HREADYOUT;
-                logic                   [31:0]  HRDATA;
-                logic                   HRDATA_En;
-                logic                   HWRITE;
                 HTRANS_state            HTRANS;
+
+                logic                   HREADYOUT;
+                HRESP_state             HRESP;
+
+                logic                   HRDATA_En;
 
                 logic                   [31:0]  o_HRDATA;
                 logic                   o_HRDATA_En;
@@ -130,8 +135,10 @@ CoreSystemDMA_slave CoreSystemDMA_slave_0 (
                         .HSIZE(HSIZE),
                         .HTRANS(HTRANS),
 
+                        .HREADY(HREADY),
                         .HREADYOUT(HREADYOUT),
                         .HRESP(HRESP),
+                        
                         .HRDATA_En(HRDATA_En),
 
                         .mem_WR_addr(mem_WR_addr),

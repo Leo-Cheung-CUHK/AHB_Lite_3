@@ -47,6 +47,11 @@ logic            [31:0] verifier_DMA_READ_Data;
 logic            o_FIFO_rd_en;
 
 // Todo: switch logic
+logic           CPU_HREADY;
+logic           CoreSystem_HREADY;
+
+
+// Memory Interface 
 assign mem_READ_addr = core_mem_READ_addr;
 assign mem_read_flag = core_mem_read_flag;
 assign core_HRDATA_fromMem = HRDATA_fromMem;
@@ -97,7 +102,8 @@ CoreSystem_ahb3lite_top CoreSystem_top_ahb(
                         .i_RCC_DMA_ADDR_HIGH(o_RCC_DMA_ADDR_HIGH),
                         .i_RCC_DMA_ADDR_LOW(o_RCC_DMA_ADDR_LOW),
 
-                        .o_FIFO_rd_en(o_FIFO_rd_en)
+                        .o_FIFO_rd_en(o_FIFO_rd_en),
+                        .HREADY(CPU_HREADY)
 );
 
 
@@ -107,7 +113,17 @@ CPU_ahb3lite_top CPU_top_ahb(
                         
                         .mem_WR_addr(CPU_mem_WRITE_addr),
                         .mem_write_flag(CPU_mem_write_flag),
-                        .HWDATA_toMem(CPU_HWDATA_toMem)
+                        .HWDATA_toMem(CPU_HWDATA_toMem),
+
+                        .HREADY(CoreSystem_HREADY)
+);
+
+Switch  switch_0 (
+                        .HCLK(HCLK),
+                        .HRESETn(HRESETn),
+
+                        .CPU_HREADY(CPU_HREADY),                
+                        .CoreSystem_HREADY(CoreSystem_HREADY)      
 );
 
 ahb3lite_memory external_memory(

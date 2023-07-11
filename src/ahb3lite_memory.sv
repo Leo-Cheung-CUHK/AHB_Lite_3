@@ -1,9 +1,5 @@
 `timescale 1ns / 1ps
 
-// class MemoryClass;
-//     rand  bit [31:0]  Memory [4096];
-// endclass
-
 module ahb3lite_memory(    
                 input  logic HCLK, 
                 input  logic HRESETn,
@@ -21,14 +17,6 @@ module ahb3lite_memory(
                 output logic [31:0] monitor_DATA
     );
     bit [31:0]  Memory [4096];
-
-    // MemoryClass MemoryClass_init = new;
-
-    // Read Data from Memory to slave
-    // assign HRDATA       = (read_flag == 1)? MemoryClass_init.Memory[READ_addr]: 0;
-    
-    // Read Data from Memory to verifier
-    // assign monitor_DATA = (monitor_flag == 1)? MemoryClass_init.Memory[monitor_addr]: 0;
 
     always_comb begin
         if (read_flag == 1) 

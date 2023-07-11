@@ -99,7 +99,6 @@ begin
         @(posedge HCLK)
         begin
             randNumGen_Int.randomize();
-            // test_top.external_memory.MemoryClass_init.randomize();
         end
 
         @(posedge HCLK)

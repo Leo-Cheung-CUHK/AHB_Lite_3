@@ -1,36 +1,44 @@
 module CPU_ahb3lite_top(
-                input   wire           HCLK, 
-                input   wire           HRESETn,
+                (* mark_debug = "true" *) 
+                input   wire                                     S_AHB_HCLK, 
+                (* mark_debug = "true" *) input   wire           S_AHB_HRESETN,
 
-                input   wire           [31:0]  HADDR,
-                input   wire           [31:0]  HWDATA,
-                input   wire           HWRITE,
-                input   wire           [2:0]   HBURST,
-                input   wire           [2:0]   HSIZE,
-                input   wire           [1:0]   HTRANS,
-
-                output   wire          HREADY,
-                output   wire          HRESP
+                (* mark_debug = "true" *) input   wire           [31:0]  S_AHB_HADDR,
+                (* mark_debug = "true" *) input   wire           [3:0]   S_AHB_HPROT, // Not Used
+                (* mark_debug = "true" *) input   wire           [1:0]   S_AHB_HTRANS,
+                (* mark_debug = "true" *) input   wire           [2:0]   S_AHB_HSIZE,
+                (* mark_debug = "true" *) input   wire           S_AHB_HWRITE,
+                (* mark_debug = "true" *) input   wire           [31:0]  S_AHB_HWDATA,
+                (* mark_debug = "true" *) input   wire           [2:0]   S_AHB_HBURST,
+                (* mark_debug = "true" *) input   wire           S_AHB_HMASTLOCK,      // Not Used
+                (* mark_debug = "true" *) output  wire           S_AHB_HREADY,
+                (* mark_debug = "true" *) output   wire          [31:0]  S_AHB_HRDATA,
+                (* mark_debug = "true" *) output  wire           S_AHB_HRESP
 );
                 // Memory Signals
-                wire                   [31:0] mem_WR_addr;
-                wire                   mem_write_flag;
-                wire                   [31:0] HWDATA_toMem;
+                (* mark_debug = "true" *) wire                   [31:0] mem_WR_addr;
+                (* mark_debug = "true" *) wire                   mem_write_flag;
+                (* mark_debug = "true" *) wire                   [31:0] HWDATA_toMem;
+
+
+
+assign S_AHB_HRDATA = 32'b0;
 
 CPU_DMA_slave CPU_DMA_slave_0 (
-                        .HCLK(HCLK), 
-                        .HRESETn(HRESETn), 
+                        .HCLK(S_AHB_HCLK), 
+                        .HRESETn(S_AHB_HRESETN), 
                         
-                        .HADDR(HADDR), 
-                        .HWDATA(HWDATA), 
-                        .HWRITE(HWRITE),
+                        .HADDR(S_AHB_HADDR), 
+                        .HWDATA(S_AHB_HWDATA), 
+                        .HWRITE(S_AHB_HWRITE),
                         
-                        .HBURST(HBURST), 
-                        .HSIZE(HSIZE),
-                        .HTRANS(HTRANS),
+                        .HBURST(S_AHB_HBURST), 
+                        .HSIZE(S_AHB_HSIZE),
+                        .HTRANS(S_AHB_HTRANS),
 
-                        .HREADY(HREADY),
-                        .HRESP(HRESP),
+                        .HREADY(1'b1),
+                        .HRESP(S_AHB_HRESP),
+                        .HREADYOUT(S_AHB_HREADY),
 
                         .mem_WR_addr(mem_WR_addr),
                         .mem_write_flag(mem_write_flag),

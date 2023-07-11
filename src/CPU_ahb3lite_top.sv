@@ -5,7 +5,10 @@ module CPU_ahb3lite_top(
                 // Memory Signals
                 output logic            [31:0] mem_WR_addr,
                 output logic            mem_write_flag,
-                output logic            [31:0] HWDATA_toMem
+                output logic            [31:0] HWDATA_toMem,
+
+                // From Switch 
+                input  logic            HREADY
 );
                 logic                   [31:0]  HADDR;
                 logic                   [31:0]  HWDATA;
@@ -15,8 +18,8 @@ module CPU_ahb3lite_top(
                 logic                   [2:0]   HSIZE;
                 HTRANS_state            HTRANS;
 
-                logic                   HREADY;
                 HRESP_state             HRESP;
+                logic                   HREADYOUT;
 
                 logic                   [5:0] RCC_Words_N;
                 logic                   [15:0] RCC_DMA_ADDR_HIGH;
@@ -36,7 +39,7 @@ CPU_DMA_master CPU_DMA_master_0(
                         .HSIZE(HSIZE),
                         .HTRANS(HTRANS),
 
-                        .HREADY(HREADY), 
+                        .HREADY(HREADYOUT), 
                         .HRESP(HRESP),
 
                         .o_RCC_Words_N(RCC_Words_N),
@@ -60,6 +63,7 @@ CPU_DMA_slave CPU_DMA_slave_0 (
 
                         .HREADY(HREADY),
                         .HRESP(HRESP),
+                        .HREADYOUT(HREADYOUT),
 
                         .mem_WR_addr(mem_WR_addr),
                         .mem_write_flag(mem_write_flag),

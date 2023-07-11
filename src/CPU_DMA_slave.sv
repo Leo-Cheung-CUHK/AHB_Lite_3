@@ -15,7 +15,8 @@ import ahb3lite_pkg::* ;
                 input HTRANS_state HTRANS,
 
                 output HRESP_state HRESP,
-                output logic HREADY,
+                input  logic HREADY,
+                output logic HREADYOUT,
                 
                 // Memory signals
                 output logic [31:0] mem_WR_addr, 
@@ -33,7 +34,7 @@ import ahb3lite_pkg::* ;
     begin
         if (HRESETn == 0) begin
             State              <= Idle;
-            HREADY             <= 1;
+            HREADYOUT          <= 1;
             mem_WR_addr        <= 0;
             HRESP              <= OKAY;
             mem_WR_addr_log    <= 0;
@@ -113,7 +114,7 @@ import ahb3lite_pkg::* ;
 
                 default: begin
                     State           <= Idle;
-                    HREADY          <= 1;
+                    HREADYOUT       <= 1;
                     mem_WR_addr     <= 0;
                     mem_WR_addr_log <= 0;
 

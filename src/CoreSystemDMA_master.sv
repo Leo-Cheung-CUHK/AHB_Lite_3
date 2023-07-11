@@ -11,7 +11,7 @@ module CoreSystemDMA_master(
 
                 // To/From Slave
                 output logic        [31:0] HADDR,
-                input  logic         [31:0] HRDATA,
+                input  logic        [31:0] HRDATA,
                 output logic        HWRITE,
 
                 output HBURST_Type  HBURST,

@@ -6,18 +6,21 @@ import ahb3lite_pkg::* ;
                 input bit HCLK,
                 input logic HRESETn,
 
-                // To/From Master
-                output logic HREADYOUT,
-                output logic [31:0] HRDATA,
-                output logic HRDATA_En,
-                output HRESP_state HRESP,
-
                 input logic [31:0] HADDR,
+                output logic [31:0] HRDATA,
+                input logic HWRITE,
+
                 input HBURST_Type HBURST,
                 input logic [2:0] HSIZE,
                 input HTRANS_state HTRANS,
-                input logic HWRITE,
-                
+
+                // To/From Master
+                output HRESP_state HRESP,
+                input  logic HREADY,
+                output logic HREADYOUT,
+
+                output logic HRDATA_En,
+
                 // Memory signals
                 output logic [31:0] mem_WR_addr, 
                 output logic  mem_read_flag,
