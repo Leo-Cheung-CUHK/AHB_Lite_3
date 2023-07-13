@@ -48,12 +48,12 @@ module CPU_DMA_master(
     logic   [15:0] HOLD_STATE_counter;
 
     task CPU_Write(  
-                            input i_CPU_Start,
-                            input HBURST_Type i_HBURST, 
-                            input logic [5:0]  i_RCC_BUFFER_LENGTH,
-                            input logic [15:0] i_RCC_DMA_ADDR_HIGH,
-                            input logic [15:0] i_RCC_DMA_ADDR_LOW,
-                            input logic [31:0] random_DATA
+                    input i_CPU_Start,
+                    input HBURST_Type i_HBURST, 
+                    input logic [5:0]  i_RCC_BUFFER_LENGTH,
+                    input logic [15:0] i_RCC_DMA_ADDR_HIGH,
+                    input logic [15:0] i_RCC_DMA_ADDR_LOW,
+                    input logic [31:0] random_DATA
     );        
            @(posedge HCLK) begin
                 HSIZE       <= WORD;
@@ -109,8 +109,15 @@ module CPU_DMA_master(
 
                     if (CPU_Start == 1) begin 
                         State <= Address_Phase;
-                        BUSY_STATE_ON <= $urandom_range(0,1);
-                        BUSY_STATE_N  <= $urandom_range(1,5);
+
+                        if (HBURST != SINGLE) begin 
+                            BUSY_STATE_ON <= $urandom_range(0,1);
+                            BUSY_STATE_N  <= $urandom_range(1,5);
+                        end else begin 
+                            BUSY_STATE_ON <= 0;
+                            BUSY_STATE_N  <= 0;
+                        end
+
                         CPU_Work     <= 1;                        
                     end else  begin 
                         State <= Idle;

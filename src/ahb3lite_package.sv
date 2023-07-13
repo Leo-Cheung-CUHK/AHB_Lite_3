@@ -5,7 +5,6 @@ package ahb3lite_pkg;
     typedef enum logic {OKAY, ERROR} HRESP_state;
     typedef enum logic {Helper_IDLE, Helper_READ} FIFO_Reader_Help_state;
     typedef enum logic [1:0] { Verifier_IDLE, Verifier_Start, Verifier_CHECK} Verifier_state;
-
     localparam WRITE = 1'b1;
     localparam READ = 1'b0;
     parameter  WORD = 3'b010;

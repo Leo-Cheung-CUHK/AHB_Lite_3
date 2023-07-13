@@ -47,9 +47,17 @@ logic            [31:0] verifier_DMA_READ_Data;
 logic            o_FIFO_rd_en;
 
 // Todo: switch logic
-logic           CPU_HREADY;
 logic           CoreSystem_HREADY;
+logic           CPU_HREADY;
+logic           Other_HREADY;
 
+HTRANS_state    CoreSystem_HTRANS;
+HTRANS_state    CPU_HTRANS;
+HTRANS_state    Other_HTRANS;
+
+logic           CPU_slave_done;
+logic           CoreSystem_slave_done;
+logic           Other_slave_done;
 
 // Memory Interface 
 assign mem_READ_addr = core_mem_READ_addr;
@@ -103,9 +111,11 @@ CoreSystem_ahb3lite_top CoreSystem_top_ahb(
                         .i_RCC_DMA_ADDR_LOW(o_RCC_DMA_ADDR_LOW),
 
                         .o_FIFO_rd_en(o_FIFO_rd_en),
-                        .HREADY(CPU_HREADY)
-);
+                        .HREADY(CoreSystem_HREADY),
+                        .o_HTRANS(CoreSystem_HTRANS),
 
+                        .slave_done(CoreSystem_slave_done)
+);
 
 CPU_ahb3lite_top CPU_top_ahb(
                         .HCLK(HCLK),
@@ -115,15 +125,38 @@ CPU_ahb3lite_top CPU_top_ahb(
                         .mem_write_flag(CPU_mem_write_flag),
                         .HWDATA_toMem(CPU_HWDATA_toMem),
 
-                        .HREADY(CoreSystem_HREADY)
+                        .HREADY(CPU_HREADY),
+                        .o_HTRANS(CPU_HTRANS),
+
+                        .slave_done(CPU_slave_done)
+);
+
+// To simulate a bus-busy case
+CPU_ahb3lite_top other_ahb(
+                        .HCLK(HCLK),
+                        .HRESETn(HRESETn),
+
+                        .HREADY(Other_HREADY),
+                        .o_HTRANS(Other_HTRANS),
+
+                        .slave_done(Other_slave_done)
 );
 
 Switch  switch_0 (
                         .HCLK(HCLK),
                         .HRESETn(HRESETn),
 
+                        .CoreSystem_slave_done(CoreSystem_slave_done),
+                        .CPU_slave_done(CPU_slave_done),
+                        .Other_slave_done(Other_slave_done),
+
+                        .CoreSystem_HTRANS(CoreSystem_HTRANS),
+                        .CPU_HTRANS(CPU_HTRANS),
+                        .Other_HTRANS(Other_HTRANS),
+
                         .CPU_HREADY(CPU_HREADY),                
-                        .CoreSystem_HREADY(CoreSystem_HREADY)      
+                        .CoreSystem_HREADY(CoreSystem_HREADY),
+                        .Other_HREADY(Other_HREADY)      
 );
 
 ahb3lite_memory external_memory(

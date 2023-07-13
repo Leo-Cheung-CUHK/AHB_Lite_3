@@ -21,6 +21,9 @@ module ahb3lite_memory(
     always_comb begin
         if (read_flag == 1) 
             HRDATA = Memory[READ_addr];
+    end
+
+    always_comb begin
         if (monitor_flag == 1) 
             monitor_DATA = Memory[monitor_addr];
     end

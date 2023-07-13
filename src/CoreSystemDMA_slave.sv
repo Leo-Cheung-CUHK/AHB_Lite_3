@@ -24,7 +24,9 @@ import ahb3lite_pkg::* ;
                 // Memory signals
                 output logic [31:0] mem_WR_addr, 
                 output logic  mem_read_flag,
-                input  logic [31:0] HRDATA_fromMem
+                input  logic [31:0] HRDATA_fromMem,
+
+                output logic slave_done
 );
   
     node_state State;
@@ -32,52 +34,65 @@ import ahb3lite_pkg::* ;
     assign HRDATA = (mem_read_flag == 1) ? HRDATA_fromMem : 0;
     assign HRDATA_En = mem_read_flag;
 
+    assign HREADYOUT = HREADY;
+
     always_ff@(posedge HCLK )
     begin
         if (HRESETn == 0) begin
             State              <= Idle;
-            HREADYOUT          <= 0;
             mem_WR_addr        <= 0;
             HRESP              <= OKAY;
+            slave_done         <= 0;
 
         end else begin
             case(State)
                 Idle: begin 
-                    HRESP              <= OKAY;
-                    HREADYOUT          <= 1;
-                    HRESP              <= OKAY;
-
                     if (HTRANS == NONSEQ) begin 
-                        State       <= Data_Phase;
+                        State       <= Data_Phase;                        
                         mem_WR_addr <= HADDR; 
                     end else begin 
                         State       <= State;
                         mem_WR_addr <= 32'b0; 
                     end
+
+                    HRESP      <= OKAY;
+                    slave_done <= 0;
                 end
 
                 Data_Phase: begin  
                     if (HBURST == SINGLE) begin
-                        mem_WR_addr     <= HADDR; 
-                        if (HTRANS == NONSEQ) begin
-                            State       <= State;
-                        end else 
-                            State       <= Idle;
+                        if (HREADY == 1)
+                            mem_WR_addr <= HADDR; 
+                        else 
+                            mem_WR_addr <= mem_WR_addr; 
+                             
+                        if (HTRANS == NONSEQ) begin 
+                            State      <= State;
+                        end else begin 
+                            State      <= Idle;
+                            slave_done <= 1;
+                        end
+
                     end else if (HBURST == INCR) begin
-                        mem_WR_addr     <= HADDR; 
+                        if (HREADY == 1)
+                            mem_WR_addr <= HADDR; 
+                        else 
+                            mem_WR_addr <= mem_WR_addr;
+
                         if (HTRANS == BUSY) begin
                             State       <= Idle;
-                            HREADYOUT   <= 0;
-                        end else 
+                            slave_done  <= 1;
+                        end else begin 
                             State       <= State;
+                        end
                     end else
                         State           <= State;
                 end
 
                 default: begin
                     State               <= Idle;
-                    HREADYOUT           <= 0;
                     mem_WR_addr         <= 0;
+                    slave_done          <= 0;
                 end
             endcase
         end
@@ -87,10 +102,10 @@ import ahb3lite_pkg::* ;
     begin 
         case(State)
             Data_Phase: begin 
-                if(HWRITE == 1)  
-                    mem_read_flag  = 0;
-                else  
+                if(HWRITE == 0 && HREADY == 1)  
                     mem_read_flag  = 1;
+                else  
+                    mem_read_flag  = 0;
             end 
 
             default: begin

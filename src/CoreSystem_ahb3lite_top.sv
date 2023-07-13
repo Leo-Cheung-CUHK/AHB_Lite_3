@@ -26,7 +26,11 @@ module CoreSystem_ahb3lite_top(
                 output logic            o_FIFO_rd_en,
 
                 // From Switch 
-                input  logic            HREADY
+                input  logic            HREADY,
+
+                output HTRANS_state     o_HTRANS,
+
+                output logic            slave_done
 );
                 // CoreSystem 
                 logic                   [31:0]  HADDR;
@@ -54,6 +58,8 @@ module CoreSystem_ahb3lite_top(
                 logic                   [5 : 0] FIFO_data_count;
                 logic                   FIFO_full;
                 logic                   FIFO_empty;
+
+assign  o_HTRANS    = HTRANS;
 
 assign  FIFO_din    = o_HRDATA;
 assign  FIFO_wr_en  = o_HRDATA_En && ~ FIFO_full;
@@ -143,6 +149,8 @@ CoreSystemDMA_slave CoreSystemDMA_slave_0 (
 
                         .mem_WR_addr(mem_WR_addr),
                         .mem_read_flag(mem_read_flag),
-                        .HRDATA_fromMem(HRDATA_fromMem)
+                        .HRDATA_fromMem(HRDATA_fromMem),
+
+                        .slave_done(slave_done)
 );
 endmodule

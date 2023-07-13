@@ -9,10 +9,13 @@ class randNumGen;
         randc bit [10:0] RCC_DMA_ADDR_LOW;
         randc bit [15:0] RCC_DMA_ADDR_HIGH;
         randc bit [31:0] RCC_DMA_INIT_DATA;
+
+        constraint c_RCC_BUFFER_LENGTH {
+            RCC_BUFFER_LENGTH > 0;
+        }
 endclass
 
 module test_master();
-
         bit             HCLK;
         logic           HRESETn;
         bit             SLOW_CLK;
@@ -20,14 +23,6 @@ module test_master();
        
         logic           i_CoreSystemStart;
         logic           i_Read_Request;
-
-        // output from the Top Module
-        logic           [7:0] O_serialized_output;
-        logic           O_serialized_output_valid;
-        logic           [1:0] O_Serialize_Counter;
-        logic           [15:0] O_Bytes_Counter;
-
-        logic           [15:0] O_RCC_BYTE_CNT; // [15:6] - reserved 
 
         // DMA-related Registers 
         logic           [15:0] RCC_BUFFER_LENGTH;  // [15:6] - reserved 
@@ -54,7 +49,8 @@ test_top test_top(
 defparam test_top.CoreSystem_top_ahb.FIFO_Master_Side_0.DSIZE = 32;
 defparam test_top.CoreSystem_top_ahb.FIFO_Master_Side_0.ASIZE = 6;
 
-randNumGen randNumGen_Int = new();
+randNumGen randNumGen_Int0 = new();
+randNumGen randNumGen_Int1 = new();
 
 initial
 begin
@@ -98,47 +94,64 @@ begin
 
         @(posedge HCLK)
         begin
-            randNumGen_Int.randomize();
-        end
-
-        @(posedge HCLK)
-        begin
-            if (randNumGen_Int.RCC_BUFFER_LENGTH == 0) 
-                RCC_BUFFER_LENGTH <= 1;    
-            else
-                RCC_BUFFER_LENGTH <= randNumGen_Int.RCC_BUFFER_LENGTH;
+            randNumGen_Int0.randomize();
+            randNumGen_Int1.randomize();
         end
 
         @(posedge HCLK) begin
-            RCC_BUFFER_LENGTH_IN_WORDS  = ((RCC_BUFFER_LENGTH[0] | RCC_BUFFER_LENGTH[1]) == 0)?
-            (RCC_BUFFER_LENGTH >> 2) : (RCC_BUFFER_LENGTH >> 2) + 1;
+            RCC_BUFFER_LENGTH_IN_WORDS  = ((randNumGen_Int0.RCC_BUFFER_LENGTH[0] | randNumGen_Int0.RCC_BUFFER_LENGTH[1]) == 0)?
+            (randNumGen_Int0.RCC_BUFFER_LENGTH >> 2) : (randNumGen_Int0.RCC_BUFFER_LENGTH >> 2) + 1;
         end
 
         @(posedge HCLK)
         begin
-            if ((randNumGen_Int.burst_type == 0) || (RCC_BUFFER_LENGTH_IN_WORDS == 1) )
+            if ((randNumGen_Int0.burst_type == 0) || (RCC_BUFFER_LENGTH_IN_WORDS == 1) )
                 HBURST            <= SINGLE;
             else 
                 HBURST            <= INCR;
-
-            RCC_DMA_ADDR_HIGH <= 16'h0000;
-            RCC_DMA_ADDR_LOW  <= randNumGen_Int.RCC_DMA_ADDR_LOW;
-
         end
 
         @(posedge HCLK);
         test_top.CoreSystem_top_ahb.CoreSystemDMA_master_0.Configure_Master(HBURST);
-        test_top.Register_Updater_0.CPU_Reg_Write(RCC_DMA_ADDR_HIGH,RCC_DMA_ADDR_LOW,RCC_BUFFER_LENGTH);
+        test_top.Register_Updater_0.CPU_Reg_Write(16'b0,randNumGen_Int0.RCC_DMA_ADDR_LOW,randNumGen_Int0.RCC_BUFFER_LENGTH);
 
-        test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Write(1'b1, HBURST, RCC_BUFFER_LENGTH, RCC_DMA_ADDR_HIGH
-        ,RCC_DMA_ADDR_LOW, randNumGen_Int.RCC_DMA_INIT_DATA);
+        ////////////////////////////////////////////////////////////////////////////////////
+        // Randomly Insert AHB traffic  ---------------- 1
+        test_top.other_ahb.CPU_DMA_master_0.CPU_Write(1'b1, HBURST, 
+        randNumGen_Int1.RCC_BUFFER_LENGTH, 32'b0,
+        randNumGen_Int1.RCC_DMA_ADDR_LOW, randNumGen_Int1.RCC_DMA_INIT_DATA);
 
         @(posedge HCLK) begin 
-            test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Write(1'b0, HBURST, RCC_BUFFER_LENGTH, RCC_DMA_ADDR_HIGH
-            ,RCC_DMA_ADDR_LOW, randNumGen_Int.RCC_DMA_INIT_DATA);
+            test_top.other_ahb.CPU_DMA_master_0.CPU_Write(1'b0, HBURST, 
+            randNumGen_Int1.RCC_BUFFER_LENGTH, 32'b0,
+            randNumGen_Int1.RCC_DMA_ADDR_LOW, randNumGen_Int1.RCC_DMA_INIT_DATA);
+        end
+        ///////////////
+
+        test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Write(1'b1, HBURST, 
+        randNumGen_Int0.RCC_BUFFER_LENGTH, 32'b0,
+        randNumGen_Int0.RCC_DMA_ADDR_LOW, randNumGen_Int0.RCC_DMA_INIT_DATA);
+
+        @(posedge HCLK) begin 
+            test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Write(1'b0, HBURST, 
+            randNumGen_Int0.RCC_BUFFER_LENGTH, 32'b0,
+            randNumGen_Int0.RCC_DMA_ADDR_LOW, randNumGen_Int0.RCC_DMA_INIT_DATA);
         end
 
         @(negedge test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Work);
+
+        ////////////////////////////////////////////////////////////////////////////////////
+        // Randomly Insert AHB traffic  ---------------- 1
+        test_top.other_ahb.CPU_DMA_master_0.CPU_Write(1'b1, HBURST, 
+        randNumGen_Int1.RCC_BUFFER_LENGTH,  32'b0,
+        randNumGen_Int1.RCC_DMA_ADDR_LOW, randNumGen_Int1.RCC_DMA_INIT_DATA);
+
+        @(posedge HCLK) begin 
+            test_top.other_ahb.CPU_DMA_master_0.CPU_Write(1'b0, HBURST, 
+            randNumGen_Int1.RCC_BUFFER_LENGTH,  32'b0,
+            randNumGen_Int1.RCC_DMA_ADDR_LOW, randNumGen_Int1.RCC_DMA_INIT_DATA);
+        end
+        ////////////////
 
         @(posedge HCLK)
         begin
@@ -166,5 +179,4 @@ begin
     end
 
 end
-
 endmodule

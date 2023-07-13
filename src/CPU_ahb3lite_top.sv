@@ -8,7 +8,10 @@ module CPU_ahb3lite_top(
                 output logic            [31:0] HWDATA_toMem,
 
                 // From Switch 
-                input  logic            HREADY
+                input  logic            HREADY,
+                output HTRANS_state     o_HTRANS,
+
+                output logic            slave_done
 );
                 logic                   [31:0]  HADDR;
                 logic                   [31:0]  HWDATA;
@@ -26,7 +29,9 @@ module CPU_ahb3lite_top(
                 logic                   [15:0] RCC_DMA_ADDR_LOW;
 
                 logic                   [31:0] o_init_data;
-                
+
+assign o_HTRANS = HTRANS;
+
 CPU_DMA_master CPU_DMA_master_0(
                         .HCLK(HCLK), 
                         .HRESETn(HRESETn), 
@@ -67,7 +72,9 @@ CPU_DMA_slave CPU_DMA_slave_0 (
 
                         .mem_WR_addr(mem_WR_addr),
                         .mem_write_flag(mem_write_flag),
-                        .HWDATA_toMem(HWDATA_toMem)
+                        .HWDATA_toMem(HWDATA_toMem),
+
+                        .slave_done(slave_done)
 );
 
 
