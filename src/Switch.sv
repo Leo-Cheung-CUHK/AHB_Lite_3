@@ -4,12 +4,12 @@ module Switch(
                 input  logic HCLK, 
                 input  logic HRESETn,
 
-                input  logic CoreSystem_slave_done,
                 input  logic CPU_slave_done,
+                input  logic CoreSystem_slave_done,
                 input  logic Other_slave_done,
 
-                input  HTRANS_state CoreSystem_HTRANS,
                 input  HTRANS_state CPU_HTRANS,
+                input  HTRANS_state CoreSystem_HTRANS,
                 input  HTRANS_state Other_HTRANS,
 
                 output logic CPU_HREADY,                
@@ -17,64 +17,97 @@ module Switch(
                 output logic Other_HREADY              
     );
 
-    logic CoreSystem_Ongoing;
-    logic CPU_Ongoing;
-    logic Other_Ongoing;
+    logic [2:0] Ongoing_v;
+    logic [2:0] Choice_v;
+
+    assign CPU_HREADY        = Choice_v[0];
+    assign CoreSystem_HREADY = Choice_v[1];
+    assign Other_HREADY      = Choice_v[2];
+
 
     always_ff @(posedge HCLK) begin
-        if (!HRESETn == 1) begin 
-            CoreSystem_Ongoing <= 0;
-            CPU_Ongoing        <= 0;
-            Other_Ongoing      <= 0;
-        end else begin 
-            if (CoreSystem_slave_done == 1)
-                CoreSystem_Ongoing <= 0;
-            else if (CoreSystem_HTRANS == NONSEQ && CoreSystem_Ongoing == 0)
-                CoreSystem_Ongoing <= 1;
-            else 
-                CoreSystem_Ongoing <= CoreSystem_Ongoing;
 
-            if (CPU_slave_done == 1)
-                CPU_Ongoing <= 0;
-            else if (CPU_HTRANS == NONSEQ && CPU_Ongoing == 0)
-                CPU_Ongoing <= 1;
-            else 
-                CPU_Ongoing <= CPU_Ongoing;
+        if (!HRESETn == 1)  
+            Ongoing_v          <= 0;
+        else begin 
 
-            if (Other_slave_done == 1)
-                Other_Ongoing <= 0;
-            else if (Other_HTRANS == NONSEQ && Other_Ongoing == 0)
-                Other_Ongoing <= 1;
+            if (CPU_slave_done == 1)  
+                Ongoing_v[0] <= 0;
+            else if (CPU_HTRANS == NONSEQ && Ongoing_v[0] == 0)  
+                Ongoing_v[0] <= 1;
+            else  
+                Ongoing_v[0] <= Ongoing_v[0];
+
+            if (CoreSystem_slave_done == 1)  
+                Ongoing_v[1] <= 0;
+            else if (CoreSystem_HTRANS == NONSEQ && Ongoing_v[1] == 0) 
+                Ongoing_v[1] <= 1;
+            else  
+                Ongoing_v[1] <= Ongoing_v[1];
+
+            if (Other_slave_done == 1) 
+                Ongoing_v[2] <= 0;
+            else if (Other_HTRANS == NONSEQ && Ongoing_v[2] == 0) 
+                Ongoing_v[2] <= 1;
             else 
-                Other_Ongoing <= Other_Ongoing;
+                Ongoing_v[2] <= Ongoing_v[2];
         end
     end
-    
-    // Switch logic
-    always_comb begin 
-        if (!HRESETn == 1) begin 
-            CPU_HREADY = 0;                
-            CoreSystem_HREADY = 0;
-            Other_HREADY = 0;     
-        end else begin
-            if (CPU_Ongoing == 1) begin
-                CPU_HREADY = 1;
-                CoreSystem_HREADY = 0;
-                Other_HREADY = 0;     
-            end else if (CPU_Ongoing == 0 && CoreSystem_Ongoing == 1) begin 
-                CPU_HREADY = 0;
-                CoreSystem_HREADY = 1;
-                Other_HREADY = 0;  
-            end else if (CPU_Ongoing == 0 && CoreSystem_Ongoing == 0 && Other_Ongoing == 1) begin 
-                CPU_HREADY = 0;
-                CoreSystem_HREADY = 0;
-                Other_HREADY = 1; 
+
+    always_ff @(posedge HCLK ) begin
+        if (!HRESETn == 1)  
+            Choice_v <= 0;
+        else begin 
+            if (Choice_v[0] == 1) begin 
+                if (Ongoing_v[0] == 0) begin 
+                    Choice_v[0] <= 0;
+
+                    if (Ongoing_v[1] == 1) 
+                        Choice_v[1] <= 1;
+                    else if (Ongoing_v[2] == 1) 
+                        Choice_v[2] <= 1;
+                    else 
+                        Choice_v    <= 0;
+                end else 
+                    Choice_v <= Choice_v;
+
+            end else if (Choice_v[1] == 1) begin 
+                if (Ongoing_v[1] == 0) begin 
+                    Choice_v[1] <= 0;
+
+                    if (Ongoing_v[0] == 1) 
+                        Choice_v[0] <= 1;
+                    else if (Ongoing_v[2] == 1) 
+                        Choice_v[2] <= 1;
+                    else 
+                        Choice_v    <= 0;
+                end else 
+                    Choice_v <= Choice_v;
+
+            end else if (Choice_v[2] == 1) begin 
+                if (Ongoing_v[2] == 0) begin 
+                    Choice_v[2] <= 0;
+
+                    if (Ongoing_v[0] == 1) 
+                        Choice_v[0] <= 1;
+                    else if (Ongoing_v[1] == 1) 
+                        Choice_v[1] <= 1;
+                    else 
+                        Choice_v    <= 0;
+                end else 
+                    Choice_v <= Choice_v;
+
             end else begin 
-                CPU_HREADY = 0;
-                CoreSystem_HREADY = 0;
-                Other_HREADY = 0; 
+                if (Ongoing_v[0] == 1) 
+                    Choice_v[0] <= 1;
+                else if (Ongoing_v[1] == 1) 
+                    Choice_v[1] <= 1;
+                else if (Ongoing_v[2] == 1) 
+                    Choice_v[2] <= 1;
+                else 
+                    Choice_v    <= 0;
             end
         end
     end
-
+        
 endmodule

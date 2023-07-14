@@ -106,7 +106,11 @@ module CPU_DMA_master(
             case(State)
                 Idle: begin 
                     RCC_Words_CNT <= 0;
+                    BUSY_STATE_counter <= 0;
 
+                    HOLD_STATE_ON <= 0;
+                    HOLD_STATE_N <= 0;
+                    HOLD_STATE_counter <= 0;
                     if (CPU_Start == 1) begin 
                         State <= Address_Phase;
 
@@ -120,7 +124,6 @@ module CPU_DMA_master(
 
                         CPU_Work     <= 1;                        
                     end else  begin 
-                        State <= Idle;
                         State <= State;
                         CPU_Work     <= 0;
                     end
@@ -130,10 +133,12 @@ module CPU_DMA_master(
                     if (BUSY_STATE_ON == 1) begin 
                         State              <= Wait_State;
                         BUSY_STATE_counter <= 0;
-
+                        BUSY_STATE_ON <= 0;
                     end else begin 
-                        State         <= Data_Phase;
-                        RCC_Words_CNT <= RCC_Words_N - 1; 
+                        State          <= Data_Phase;
+                        RCC_Words_CNT  <= RCC_Words_N - 1; 
+                        HOLD_STATE_ON  <= $urandom_range(0,1);
+                        HOLD_STATE_N   <= $urandom_range(1,5);
                     end
                 end
 
@@ -142,6 +147,8 @@ module CPU_DMA_master(
                         BUSY_STATE_counter <= 0;
                         State              <= Data_Phase;
                         RCC_Words_CNT      <= RCC_Words_N - 1; 
+                        HOLD_STATE_ON  <= $urandom_range(0,1);
+                        HOLD_STATE_N   <= $urandom_range(1,5);
                     end else begin 
                         BUSY_STATE_counter <= BUSY_STATE_counter + 1;
                         State              <= State;
@@ -161,11 +168,6 @@ module CPU_DMA_master(
                             State         <= State; 
                             RCC_Words_CNT <= RCC_Words_CNT - 1; 
                         end 
-
-                        if (RCC_Words_CNT >2) begin 
-                            HOLD_STATE_ON  <= $urandom_range(0,1);
-                            HOLD_STATE_N   <= $urandom_range(1,5);
-                        end 
                     end             
                 end
 
@@ -173,6 +175,9 @@ module CPU_DMA_master(
                     if (HOLD_STATE_counter == HOLD_STATE_N - 1) begin 
                         HOLD_STATE_counter <= 0;
                         State              <= Data_Phase;
+                        HOLD_STATE_ON  <= $urandom_range(0,1);
+                        HOLD_STATE_N   <= $urandom_range(1,5);
+
                     end else begin 
                         HOLD_STATE_counter <= HOLD_STATE_counter + 1;
                         State              <= State;
@@ -189,7 +194,6 @@ module CPU_DMA_master(
 
                     HOLD_STATE_ON <= 0;
                     HOLD_STATE_N <= 0;
-                    
                     HOLD_STATE_counter <= 0;
 
                     CPU_Work      <= 0;

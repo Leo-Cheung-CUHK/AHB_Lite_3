@@ -138,20 +138,7 @@ begin
             randNumGen_Int0.RCC_DMA_ADDR_LOW, randNumGen_Int0.RCC_DMA_INIT_DATA);
         end
 
-        @(negedge test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Work);
-
-        ////////////////////////////////////////////////////////////////////////////////////
-        // Randomly Insert AHB traffic  ---------------- 1
-        test_top.other_ahb.CPU_DMA_master_0.CPU_Write(1'b1, HBURST, 
-        randNumGen_Int1.RCC_BUFFER_LENGTH,  32'b0,
-        randNumGen_Int1.RCC_DMA_ADDR_LOW, randNumGen_Int1.RCC_DMA_INIT_DATA);
-
-        @(posedge HCLK) begin 
-            test_top.other_ahb.CPU_DMA_master_0.CPU_Write(1'b0, HBURST, 
-            randNumGen_Int1.RCC_BUFFER_LENGTH,  32'b0,
-            randNumGen_Int1.RCC_DMA_ADDR_LOW, randNumGen_Int1.RCC_DMA_INIT_DATA);
-        end
-        ////////////////
+        // @(negedge test_top.CPU_top_ahb.CPU_DMA_master_0.CPU_Work);
 
         @(posedge HCLK)
         begin

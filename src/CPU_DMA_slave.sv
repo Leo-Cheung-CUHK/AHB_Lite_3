@@ -63,9 +63,13 @@ import ahb3lite_pkg::* ;
                             else 
                                 mem_WR_addr <= mem_WR_addr;  
                         end else if (HTRANS == IDLE) begin
-                            State       <= Idle;
-                            mem_WR_addr <= 32'b0; 
-                            slave_done  <= 1;
+                            if (HREADY == 1) begin 
+                                State       <= Idle;
+                                mem_WR_addr <= 32'b0; 
+                                slave_done  <= 1;
+                            end else begin 
+                                mem_WR_addr <= mem_WR_addr; 
+                            end
                         end else begin 
                             State       <= Idle;
                             mem_WR_addr <= 32'b0;
@@ -103,13 +107,19 @@ import ahb3lite_pkg::* ;
 
                 BUSY_State: begin 
                     if (HTRANS == BUSY) begin
-                        State       <= BUSY_State;
+                        State           <= BUSY_State;
                         mem_WR_addr     <= mem_WR_addr; 
                         mem_WR_addr_log <= mem_WR_addr_log;
                     end else if (HTRANS == SEQ) begin 
-                        State       <= Data_Phase;
-                        mem_WR_addr <= mem_WR_addr_log; 
-                        mem_WR_addr_log <= 0;
+                        if (HREADY == 1) begin 
+                            State       <= Data_Phase;
+                            mem_WR_addr <= mem_WR_addr_log; 
+                            mem_WR_addr_log <= 0;
+                        end else begin 
+                            State       <= State;
+                            mem_WR_addr <= mem_WR_addr; 
+                            mem_WR_addr_log <= mem_WR_addr_log;
+                        end
                     end else if (HTRANS == IDLE) begin
                         State       <= Idle;
                         mem_WR_addr <= 32'b0; 
@@ -119,7 +129,6 @@ import ahb3lite_pkg::* ;
                         State       <= Idle;
                         mem_WR_addr <= 32'b0; 
                         mem_WR_addr_log <= 0;
-
                     end 
                 end
 

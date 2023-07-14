@@ -87,7 +87,8 @@ CPU_Verifier CPU_Verifier_0(
                         .RCC_Words_N(RCC_Words_N),
                         .RCC_DMA_ADDR_HIGH(RCC_DMA_ADDR_HIGH),
                         .RCC_DMA_ADDR_LOW(RCC_DMA_ADDR_LOW),
-
+            // From Slave
+                        .HREADY(HREADY),
             // Memory Signals
                         .mem_WR_addr(mem_WR_addr),
                         .mem_write_flag(mem_write_flag),
