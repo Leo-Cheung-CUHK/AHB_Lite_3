@@ -14,17 +14,8 @@ logic           [1:0] O_Serialize_Counter;
 logic           [15:0] O_Bytes_Counter;
 logic           [15:0] O_RCC_BYTE_CNT;
 
-logic            [31:0] core_mem_READ_addr;
-logic            core_mem_read_flag;
-logic            [31:0]  core_HRDATA_fromMem;
-
 logic            ReadSystem_Master_Done;
 logic            NewCommandOn;
-
-// CPU system 
-logic            [31:0] CPU_mem_WRITE_addr;
-logic            CPU_mem_write_flag;
-logic            [31:0]  CPU_HWDATA_toMem;
 
 //Memory interface 
 logic            [31:0] mem_READ_addr;
@@ -48,25 +39,16 @@ logic            o_FIFO_rd_en;
 
 // Todo: switch logic
 logic           ReadSystem_HREADY;
-logic           CPU_HREADY;
+logic           WriteSystem_HREADY;
 logic           Other_HREADY;
 
 HTRANS_state    ReadSystem_HTRANS;
-HTRANS_state    CPU_HTRANS;
+HTRANS_state    WriteSystem_HTRANS;
 HTRANS_state    Other_HTRANS;
 
 logic           ReadSystem_slave_done;
-logic           CPU_slave_done;
+logic           WriteSystem_slave_done;
 logic           Other_slave_done;
-
-// Memory Interface 
-assign mem_READ_addr = core_mem_READ_addr;
-assign mem_read_flag = core_mem_read_flag;
-assign core_HRDATA_fromMem = HRDATA_fromMem;
-
-assign mem_WRITE_addr = CPU_mem_WRITE_addr;
-assign mem_write_flag = CPU_mem_write_flag;
-assign HWDATA_toMem = CPU_HWDATA_toMem;
 
 Read_Verifier  Read_Verifier_0(
                         .CLK(SLOW_CLK),
@@ -102,9 +84,9 @@ ReadSystem_ahb3lite_top ReadSystem_top_ahb(
                         .O_Bytes_Counter(O_Bytes_Counter),
                         .O_RCC_BYTE_CNT(O_RCC_BYTE_CNT),
 
-                        .mem_WR_addr(core_mem_READ_addr),
-                        .mem_read_flag(core_mem_read_flag),
-                        .HRDATA_fromMem(core_HRDATA_fromMem),
+                        .mem_WR_addr(mem_READ_addr),
+                        .mem_read_flag(mem_read_flag),
+                        .HRDATA_fromMem(HRDATA_fromMem),
 
                         .i_RCC_BUFFER_LENGTH(o_RCC_BUFFER_LENGTH),
                         .i_RCC_DMA_ADDR_HIGH(o_RCC_DMA_ADDR_HIGH),
@@ -121,14 +103,14 @@ WriteSystem_ahb3lite_top WriteSystem_top_ahb(
                         .HCLK(HCLK),
                         .HRESETn(HRESETn),
                         
-                        .mem_WR_addr(CPU_mem_WRITE_addr),
-                        .mem_write_flag(CPU_mem_write_flag),
-                        .HWDATA_toMem(CPU_HWDATA_toMem),
+                        .mem_WR_addr(mem_WRITE_addr),
+                        .mem_write_flag(mem_write_flag),
+                        .HWDATA_toMem(HWDATA_toMem),
 
-                        .HREADY(CPU_HREADY),
-                        .o_HTRANS(CPU_HTRANS),
+                        .HREADY(WriteSystem_HREADY),
+                        .o_HTRANS(WriteSystem_HTRANS),
 
-                        .slave_done(CPU_slave_done)
+                        .slave_done(WriteSystem_slave_done)
 );
 
 // To simulate a busy-traffic case
@@ -147,15 +129,15 @@ Switch  switch_0 (
                         .HRESETn(HRESETn),
 
                         .ReadSystem_slave_done(ReadSystem_slave_done),
-                        .CPU_slave_done(CPU_slave_done),
+                        .WriteSystem_slave_done(WriteSystem_slave_done),
                         .Other_slave_done(Other_slave_done),
 
                         .ReadSystem_HTRANS(ReadSystem_HTRANS),
-                        .CPU_HTRANS(CPU_HTRANS),
+                        .WriteSystem_HTRANS(WriteSystem_HTRANS),
                         .Other_HTRANS(Other_HTRANS),
 
-                        .CPU_HREADY(CPU_HREADY),                
                         .ReadSystem_HREADY(ReadSystem_HREADY),
+                        .WriteSystem_HREADY(WriteSystem_HREADY),                
                         .Other_HREADY(Other_HREADY)      
 );
 
