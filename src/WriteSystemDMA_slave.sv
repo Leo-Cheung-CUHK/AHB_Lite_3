@@ -1,6 +1,6 @@
 import ahb3lite_pkg::* ;
 
-    module CPU_DMA_slave
+    module WriteSystemDMA_slave
     (
                 // Global signals       
                 input bit HCLK,

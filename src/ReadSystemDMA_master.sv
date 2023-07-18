@@ -1,13 +1,13 @@
 import ahb3lite_pkg::* ;
 
-module CoreSystemDMA_master(
+module ReadSystemDMA_master(
 
             // AHB protocol inputs and ouptuts
                 input bit           HCLK,
                 input logic         HRESETn,
 
-                input  logic        i_CoreSystemStart,
-                output logic        CoreSystemStart,
+                input  logic        i_ReadSystemStart,
+                output logic        ReadSystemStart,
 
                 // To/From Slave
                 output logic        [31:0] HADDR,
@@ -46,7 +46,7 @@ module CoreSystemDMA_master(
 
     node_state State = Idle;
 
-    assign  CoreSystemStart = i_CoreSystemStart;
+    assign  ReadSystemStart = i_ReadSystemStart;
     assign  o_HRDATA  = HRDATA;
     assign  o_HRDATA_En = HRDATA_En;
     assign  RCC_Words_N  = ((i_RCC_BUFFER_LENGTH[0] | i_RCC_BUFFER_LENGTH[1]) == 0)?
@@ -67,7 +67,7 @@ module CoreSystemDMA_master(
                     RCC_Words_CNT <= 0;
                     HSIZE         <= 0;
 
-                    if (i_CoreSystemStart == 1) begin 
+                    if (i_ReadSystemStart == 1) begin 
                         i_HADDR <= {i_RCC_DMA_ADDR_HIGH, i_RCC_DMA_ADDR_LOW};
                         State   <= Address_Phase;
 

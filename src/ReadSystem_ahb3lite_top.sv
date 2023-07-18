@@ -1,10 +1,10 @@
-module CoreSystem_ahb3lite_top(
+module ReadSystem_ahb3lite_top(
                 input   logic           HCLK, 
                 input   logic           HRESETn,
                 input   logic           SLOW_CLK,
                 input   logic           SLOW_RESETn,
                 input   logic           i_Read_Request,
-                input   logic           i_CoreSystemStart,
+                input   logic           i_ReadSystemStart,
 
                 output  logic           [7:0] O_serialized_output,
                 output  logic           O_serialized_output_valid,
@@ -32,7 +32,7 @@ module CoreSystem_ahb3lite_top(
 
                 output logic            slave_done
 );
-                // CoreSystem 
+                // ReadSystem 
                 logic                   [31:0]  HADDR;
                 logic                   [31:0]  HRDATA;
                 logic                   HWRITE;
@@ -102,11 +102,11 @@ async_fifo  FIFO_Master_Side_0(
                         .number(FIFO_data_count)
 );
 
-CoreSystemDMA_master CoreSystemDMA_master_0(
+ReadSystemDMA_master ReadSystemDMA_master_0(
                         .HCLK(HCLK), 
                         .HRESETn(HRESETn), 
 
-                        .i_CoreSystemStart(i_CoreSystemStart),
+                        .i_ReadSystemStart(i_ReadSystemStart),
 
                         .HADDR(HADDR), 
                         .HRDATA(HRDATA), 
@@ -129,7 +129,7 @@ CoreSystemDMA_master CoreSystemDMA_master_0(
 
 );
 
-CoreSystemDMA_slave CoreSystemDMA_slave_0 (
+ReadSystemDMA_slave ReadSystemDMA_slave_0 (
                         .HCLK(HCLK), 
                         .HRESETn(HRESETn), 
                         

@@ -1,4 +1,4 @@
-module CPU_ahb3lite_top(
+module WriteSystem_ahb3lite_top(
                 (* mark_debug = "true" *) 
                 input   wire                                     S_AHB_HCLK, 
                 (* mark_debug = "true" *) input   wire           S_AHB_HRESETN,
@@ -24,7 +24,7 @@ module CPU_ahb3lite_top(
 
 assign S_AHB_HRDATA = 32'b0;
 
-CPU_DMA_slave CPU_DMA_slave_0 (
+WriteSystemDMA_slave WriteSystemDMA_slave_0 (
                         .HCLK(S_AHB_HCLK), 
                         .HRESETn(S_AHB_HRESETN), 
                         
@@ -45,7 +45,7 @@ CPU_DMA_slave CPU_DMA_slave_0 (
                         .HWDATA_toMem(HWDATA_toMem)
 );
 
-ahb3lite_memory external_memory(
+external_memory external_memory_0(
                         .HCLK(HCLK),
                         .HRESETn(HRESETn),
                         

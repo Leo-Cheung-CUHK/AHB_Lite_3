@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module ahb3lite_memory(    
+module external_memory(    
                 input  logic HCLK, 
                 input  logic HRESETn,
 

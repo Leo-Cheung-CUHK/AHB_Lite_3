@@ -1,6 +1,6 @@
 import ahb3lite_pkg::* ;
 
-module CPU_DMA_master(
+module WriteSystemDMA_master(
 
             // AHB protocol inputs and ouptuts
                 input bit           HCLK,

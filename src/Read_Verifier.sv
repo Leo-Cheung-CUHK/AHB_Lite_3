@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-module Verifier(
+module Read_Verifier(
     input  bit          CLK,
     input  logic        RESETn,
 

@@ -4,7 +4,7 @@ module test_top(
         input logic           SLOW_CLK,
         input logic           SLOW_RESETn,
         input logic           i_Read_Request,
-        input logic           i_CoreSystemStart
+        input logic           i_ReadSystemStart
 );
 
 // Core system 
@@ -18,7 +18,7 @@ logic            [31:0] core_mem_READ_addr;
 logic            core_mem_read_flag;
 logic            [31:0]  core_HRDATA_fromMem;
 
-logic            CoreSystem_Master_Done;
+logic            ReadSystem_Master_Done;
 logic            NewCommandOn;
 
 // CPU system 
@@ -47,16 +47,16 @@ logic            [31:0] verifier_DMA_READ_Data;
 logic            o_FIFO_rd_en;
 
 // Todo: switch logic
-logic           CoreSystem_HREADY;
+logic           ReadSystem_HREADY;
 logic           CPU_HREADY;
 logic           Other_HREADY;
 
-HTRANS_state    CoreSystem_HTRANS;
+HTRANS_state    ReadSystem_HTRANS;
 HTRANS_state    CPU_HTRANS;
 HTRANS_state    Other_HTRANS;
 
+logic           ReadSystem_slave_done;
 logic           CPU_slave_done;
-logic           CoreSystem_slave_done;
 logic           Other_slave_done;
 
 // Memory Interface 
@@ -68,7 +68,7 @@ assign mem_WRITE_addr = CPU_mem_WRITE_addr;
 assign mem_write_flag = CPU_mem_write_flag;
 assign HWDATA_toMem = CPU_HWDATA_toMem;
 
-Verifier  Verifier_0(
+Read_Verifier  Read_Verifier_0(
                         .CLK(SLOW_CLK),
                         .RESETn(SLOW_RESETn),
 
@@ -88,12 +88,12 @@ Verifier  Verifier_0(
                         .i_HRDATA(verifier_DMA_READ_Data)
 );
 
-CoreSystem_ahb3lite_top CoreSystem_top_ahb(
+ReadSystem_ahb3lite_top ReadSystem_top_ahb(
                         .HCLK(HCLK), 
                         .SLOW_CLK(SLOW_CLK), 
                         .HRESETn(HRESETn), 
                         .SLOW_RESETn(SLOW_RESETn), 
-                        .i_CoreSystemStart(i_CoreSystemStart),
+                        .i_ReadSystemStart(i_ReadSystemStart),
                         .i_Read_Request(i_Read_Request),
 
                         .O_serialized_output(O_serialized_output),
@@ -111,13 +111,13 @@ CoreSystem_ahb3lite_top CoreSystem_top_ahb(
                         .i_RCC_DMA_ADDR_LOW(o_RCC_DMA_ADDR_LOW),
 
                         .o_FIFO_rd_en(o_FIFO_rd_en),
-                        .HREADY(CoreSystem_HREADY),
-                        .o_HTRANS(CoreSystem_HTRANS),
+                        .HREADY(ReadSystem_HREADY),
+                        .o_HTRANS(ReadSystem_HTRANS),
 
-                        .slave_done(CoreSystem_slave_done)
+                        .slave_done(ReadSystem_slave_done)
 );
 
-CPU_ahb3lite_top CPU_top_ahb(
+WriteSystem_ahb3lite_top WriteSystem_top_ahb(
                         .HCLK(HCLK),
                         .HRESETn(HRESETn),
                         
@@ -131,8 +131,8 @@ CPU_ahb3lite_top CPU_top_ahb(
                         .slave_done(CPU_slave_done)
 );
 
-// To simulate a bus-busy case
-CPU_ahb3lite_top other_ahb(
+// To simulate a busy-traffic case
+WriteSystem_ahb3lite_top other_ahb(
                         .HCLK(HCLK),
                         .HRESETn(HRESETn),
 
@@ -146,20 +146,20 @@ Switch  switch_0 (
                         .HCLK(HCLK),
                         .HRESETn(HRESETn),
 
-                        .CoreSystem_slave_done(CoreSystem_slave_done),
+                        .ReadSystem_slave_done(ReadSystem_slave_done),
                         .CPU_slave_done(CPU_slave_done),
                         .Other_slave_done(Other_slave_done),
 
-                        .CoreSystem_HTRANS(CoreSystem_HTRANS),
+                        .ReadSystem_HTRANS(ReadSystem_HTRANS),
                         .CPU_HTRANS(CPU_HTRANS),
                         .Other_HTRANS(Other_HTRANS),
 
                         .CPU_HREADY(CPU_HREADY),                
-                        .CoreSystem_HREADY(CoreSystem_HREADY),
+                        .ReadSystem_HREADY(ReadSystem_HREADY),
                         .Other_HREADY(Other_HREADY)      
 );
 
-ahb3lite_memory external_memory(
+external_memory external_memory_0(
                         .HCLK(HCLK),
                         .HRESETn(HRESETn),
 

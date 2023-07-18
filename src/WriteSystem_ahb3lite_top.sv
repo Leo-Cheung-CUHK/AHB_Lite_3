@@ -1,4 +1,4 @@
-module CPU_ahb3lite_top(
+module WriteSystem_ahb3lite_top(
                 input   logic           HCLK, 
                 input   logic           HRESETn,
 
@@ -32,7 +32,7 @@ module CPU_ahb3lite_top(
 
 assign o_HTRANS = HTRANS;
 
-CPU_DMA_master CPU_DMA_master_0(
+WriteSystemDMA_master WriteSystemDMA_master_0(
                         .HCLK(HCLK), 
                         .HRESETn(HRESETn), 
 
@@ -54,7 +54,7 @@ CPU_DMA_master CPU_DMA_master_0(
                         .o_init_data(o_init_data)
 );
 
-CPU_DMA_slave CPU_DMA_slave_0 (
+WriteSystemDMA_slave WriteSystemDMA_slave_0 (
                         .HCLK(HCLK), 
                         .HRESETn(HRESETn), 
                         
@@ -78,7 +78,7 @@ CPU_DMA_slave CPU_DMA_slave_0 (
 );
 
 
-CPU_Verifier CPU_Verifier_0(
+Write_Verifier Write_Verifier_0(
                         .HCLK(HCLK), 
                         .HRESETn(HRESETn),
 

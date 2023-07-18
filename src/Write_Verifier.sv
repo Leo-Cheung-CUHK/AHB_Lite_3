@@ -1,6 +1,6 @@
 import ahb3lite_pkg::* ;
 
-module CPU_Verifier (
+module Write_Verifier (
             input   logic           HCLK, 
             input   logic           HRESETn,
 
