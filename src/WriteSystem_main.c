@@ -1,196 +1,183 @@
 /******************************************************************************
+* Copyright (C) 2010 - 2021 Xilinx, Inc.  All rights reserved.
+* SPDX-License-Identifier: MIT
+******************************************************************************/
+
+/*****************************************************************************/
+/**
+* @file xbram_example.c
 *
-* Copyright (C) 2009 - 2014 Xilinx, Inc.  All rights reserved.
+* This file contains a self test example using the BRAM driver (XBram).
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
+* <pre>
+* MODIFICATION HISTORY:
 *
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-* XILINX  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
-* OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*
-* Except as contained in this notice, the name of the Xilinx shall not be used
-* in advertising or otherwise to promote the sale, use or other dealings in
-* this Software without prior written authorization from Xilinx.
+* Ver   Who  Date	 Changes
+* ----- ---- -------- -------------------------------------------------------
+* 1.00a sa   05/11/10 Initial release.
+* 3.01a sa   13/01/12 Changed XBram_SelfTest(InstancePtr) to
+* 			 XBram_SelfTest(InstancePtr,0) as per
+*			 new API (CR 639274)
+* 4.1   ms   01/23/17 Modified xil_printf statement in main function to
+*                     ensure that "Successfully ran" and "Failed" strings are
+*                     available in all examples. This is a fix for CR-965028.
+*</pre>
 *
 ******************************************************************************/
 
-/*
- * helloworld.c: simple test application
- *
- * This application configures UART 16550 to baud rate 9600.
- * PS7 UART (Zynq) is not initialized by this application, since
- * bootrom/bsp configures it to baud rate 115200
- *
- * ------------------------------------------------
- * | UART TYPE   BAUD RATE                        |
- * ------------------------------------------------
- *   uartns550   9600
- *   uartlite    Configurable only in HW design
- *   ps7_uart    115200 (configured by bootrom/bsp)
- */
 /***************************** Include Files *********************************/
-#include <stdio.h>
-#include "platform.h"
-#include "xil_printf.h"
-#include "xaxidma.h"
-#include "xparameters.h"
-#include "xdebug.h"
 
-/******************** Constant Definitions **********************************/
+#include "xparameters.h"
+#include "xbram.h"
+#include <stdio.h>
+#include <sleep.h>
+/************************** Constant Definitions *****************************/
 
 /*
- * Device hardware build related constants.
+ * The following constants map to the XPAR parameters created in the
+ * xparameters.h file. They are defined here such that a user can easily
+ * change all the needed parameters in one place.
  */
-
-#define DMA_DEV_ID		XPAR_AXIDMA_0_DEVICE_ID
-
-#ifdef XPAR_AXI_7SDDR_0_S_AXI_BASEADDR
-#define DDR_BASE_ADDR		XPAR_AXI_7SDDR_0_S_AXI_BASEADDR
-#elif defined (XPAR_MIG7SERIES_0_BASEADDR)
-#define DDR_BASE_ADDR	XPAR_MIG7SERIES_0_BASEADDR
-#elif defined (XPAR_MIG_0_C0_DDR4_MEMORY_MAP_BASEADDR)
-#define DDR_BASE_ADDR	XPAR_MIG_0_C0_DDR4_MEMORY_MAP_BASEADDR
-#elif defined (XPAR_PSU_DDR_0_S_AXI_BASEADDR)
-#define DDR_BASE_ADDR	XPAR_PSU_DDR_0_S_AXI_BASEADDR
-#endif
-
-#ifndef DDR_BASE_ADDR
-#warning CHECK FOR THE VALID DDR ADDRESS IN XPARAMETERS.H, \
-		 DEFAULT SET TO 0x01000000
-#define MEM_BASE_ADDR		0x01000000
-#else
-#define MEM_BASE_ADDR		(DDR_BASE_ADDR + 0x1000000)
-#endif
-
-#define TX_BUFFER_BASE		(MEM_BASE_ADDR + 0x00100000)
-
-#define MAX_PKT_LEN		0x20
-
-#define TEST_START_VALUE	0xC
-
-#define NUMBER_OF_TRANSFERS	10
-
-/**************************** Type Definitions *******************************/
-
-
-/***************** Macros (Inline Functions) Definitions *********************/
+#define BRAM_DEVICE_ID		XPAR_BRAM_0_DEVICE_ID
 
 
 /************************** Function Prototypes ******************************/
 
-#if (!defined(DEBUG))
-extern void xil_printf(const char *format, ...);
-#endif
+int BramExample(u16 DeviceId);
+static void InitializeECC(XBram_Config *ConfigPtr, u32 EffectiveAddr);
 
-int XAxiDma_SimplePollExample(u16 DeviceId);
-static int CheckData(void);
 
 /************************** Variable Definitions *****************************/
+
 /*
- * Device instance definitions
+ * The following are declared globally so they are zeroed and so they are
+ * easily accessible from a debugger
  */
-XAxiDma AxiDma;
+XBram Bram;	/* The Instance of the BRAM Driver */
 
-int main()
+
+/****************************************************************************/
+/**
+*
+* This function is the main function of the BRAM example.
+*
+* @param	None.
+*
+* @return
+*		- XST_SUCCESS to indicate success.
+*		- XST_FAILURE to indicate failure.
+*
+* @note		None.
+*
+*****************************************************************************/
+#ifndef TESTAPP_GEN
+int main(void)
 {
-    int Status;
+	int Status;
+	while (1){
+		Status = BramExample(BRAM_DEVICE_ID);
+		if (Status != XST_SUCCESS ) {
+			xil_printf("Bram Example Failed\r\n");
+			return XST_FAILURE;
+		}
 
-	xil_printf("\r\n--- Entering main() --- \r\n");
+		xil_printf("Successfully ran Bram Example\r\n");
+		usleep(20000);
+	}
+	return XST_SUCCESS;
+}
+#endif
 
-    init_platform();
+/*****************************************************************************/
+/**
+*
+* This is the entry point for the BRAM example.
+*
+* @param	DeviceId is the XPAR_<BRAM_instance>_DEVICE_ID value from
+*		xparameters.h
+*
+* @return
+*		- XST_SUCCESS to indicate success.
+*		- XST_FAILURE to indicate failure.
+*
+* @note		None.
+*
+******************************************************************************/
+int BramExample(u16 DeviceId)
+{
+	int Status;
+	XBram_Config *ConfigPtr;
 
-	/* Run the poll example for simple transfer */
-	Status = XAxiDma_SimplePollExample(DMA_DEV_ID);
+	/*
+	 * Initialize the BRAM driver. If an error occurs then exit
+	 */
 
-	if (Status != XST_SUCCESS) {
-		xil_printf("XAxiDma_SimplePoll Example Failed\r\n");
+	/*
+	 * Lookup configuration data in the device configuration table.
+	 * Use this configuration info down below when initializing this
+	 * driver.
+	 */
+	ConfigPtr = XBram_LookupConfig(DeviceId);
+	if (ConfigPtr == (XBram_Config *) NULL) {
 		return XST_FAILURE;
 	}
 
-	xil_printf("--- Exiting main() --- \r\n");
-    cleanup_platform();
+	Status = XBram_CfgInitialize(&Bram, ConfigPtr,
+				     ConfigPtr->CtrlBaseAddress);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+
+        InitializeECC(ConfigPtr, ConfigPtr->CtrlBaseAddress);
+
+
+	/*
+	 * Execute the BRAM driver selftest.
+	 */
+	Status = XBram_SelfTest(&Bram, 0);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
 	return XST_SUCCESS;
 }
 
 
-int XAxiDma_SimplePollExample(u16 DeviceId)
+/****************************************************************************/
+/**
+*
+* This function ensures that ECC in the BRAM is initialized if no hardware
+* initialization is available. The ECC bits are initialized by reading and
+* writing data in the memory. This code is not optimized to only read data
+* in initialized sections of the BRAM.
+*
+* @param	ConfigPtr is a reference to a structure containing information
+*		about a specific BRAM device.
+* @param 	EffectiveAddr is the device base address in the virtual memory
+*		address space.
+*
+* @return
+*		None
+*
+* @note		None.
+*
+*****************************************************************************/
+void InitializeECC(XBram_Config *ConfigPtr, u32 EffectiveAddr)
 {
-	XAxiDma_Config *CfgPtr;
-	int Status;
-	int Tries = NUMBER_OF_TRANSFERS;
-	int Index;
-	u8 *TxBufferPtr;
-	u8 Value;
+	u32 Addr;
+	volatile u32 Data;
 
-	TxBufferPtr = (u8 *)TX_BUFFER_BASE ;
-
-	/* Initialize the XAxiDma device.
-	 */
-	CfgPtr = XAxiDma_LookupConfig(DeviceId);
-	if (!CfgPtr) {
-		xil_printf("No config found for %d\r\n", DeviceId);
-		return XST_FAILURE;
-	}
-
-	Status = XAxiDma_CfgInitialize(&AxiDma, CfgPtr);
-	if (Status != XST_SUCCESS) {
-		xil_printf("Initialization failed %d\r\n", Status);
-		return XST_FAILURE;
-	}
-
-	if(XAxiDma_HasSg(&AxiDma)){
-		xil_printf("Device configured as SG mode \r\n");
-		return XST_FAILURE;
-	}
-
-	/* Disable interrupts, we use polling mode
-	 */
-	XAxiDma_IntrDisable(&AxiDma, XAXIDMA_IRQ_ALL_MASK,
-						XAXIDMA_DMA_TO_DEVICE);
-
-	Value = TEST_START_VALUE;
-
-	for(Index = 0; Index < MAX_PKT_LEN; Index ++) {
-			TxBufferPtr[Index] = Value;
-
-			Value = (Value + 1) & 0xFF;
-	}
-	/* Flush the buffers before the DMA transfer, in case the Data Cache
-	 * is enabled
-	 */
-	Xil_DCacheFlushRange((UINTPTR)TxBufferPtr, MAX_PKT_LEN);
-
-	for(Index = 0; Index < Tries; Index ++) {
-
-		Status = XAxiDma_SimpleTransfer(&AxiDma,(UINTPTR) TxBufferPtr,
-					MAX_PKT_LEN, XAXIDMA_DMA_TO_DEVICE);
-
-		if (Status != XST_SUCCESS) {
-			return XST_FAILURE;
+	if (ConfigPtr->EccPresent &&
+	    ConfigPtr->EccOnOffRegister &&
+	    ConfigPtr->EccOnOffResetValue == 0 &&
+	    ConfigPtr->WriteAccess != 0) {
+		for (Addr = ConfigPtr->MemBaseAddress;
+		     Addr < ConfigPtr->MemHighAddress; Addr+=4) {
+			Data = XBram_In32(Addr);
+			XBram_Out32(Addr, Data);
 		}
-
-		while (XAxiDma_Busy(&AxiDma,XAXIDMA_DMA_TO_DEVICE)) {
-				/* Wait */
-		}
+		XBram_WriteReg(EffectiveAddr, XBRAM_ECC_ON_OFF_OFFSET, 1);
 	}
-
-	/* Transfer finishes successfully
-	 */
-	return XST_SUCCESS;
 }

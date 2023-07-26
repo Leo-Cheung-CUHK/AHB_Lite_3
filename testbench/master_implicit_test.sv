@@ -9,7 +9,7 @@ class randNumGen;
         randc bit [10:0] RCC_DMA_ADDR_LOW;
         randc bit [15:0] RCC_DMA_ADDR_HIGH;
         randc bit [31:0] RCC_DMA_INIT_DATA;
-
+        rand  bit read_ornot;
         constraint c_RCC_BUFFER_LENGTH {
             RCC_BUFFER_LENGTH > 0;
         }
@@ -23,6 +23,7 @@ module test_master();
        
         logic           i_ReadSystemStart;
         logic           i_Read_Request;
+        logic           i_VeriferStart;
 
         // DMA-related Registers 
         logic           [15:0] RCC_BUFFER_LENGTH;  // [15:6] - reserved 
@@ -37,13 +38,16 @@ module test_master();
         // Run time counter
         logic           [63 : 0]  Test_N = 0;
 
+        logic           [63:0] Read_Counter;
+
 test_top test_top(
                     .HCLK(HCLK), 
                     .SLOW_CLK(SLOW_CLK), 
                     .HRESETn(HRESETn), 
                     .SLOW_RESETn(SLOW_RESETn), 
                     .i_ReadSystemStart(i_ReadSystemStart),
-                    .i_Read_Request(i_Read_Request)
+                    .i_Read_Request(i_Read_Request),
+                    .i_VeriferStart(i_VeriferStart)
 );
 
 defparam test_top.ReadSystem_top_ahb.FIFO_Master_Side_0.DSIZE = 32;
@@ -51,6 +55,7 @@ defparam test_top.ReadSystem_top_ahb.FIFO_Master_Side_0.ASIZE = 6;
 
 randNumGen randNumGen_Int0 = new();
 randNumGen randNumGen_Int1 = new();
+randNumGen randNumGen_Int2 = new();
 
 initial
 begin
@@ -152,15 +157,25 @@ begin
 
         @(posedge SLOW_CLK)
         begin
-            i_Read_Request <= 1;
+            i_VeriferStart <= 1;
         end
 
-        @(posedge test_top.ReadSystem_top_ahb.O_serialized_output_valid)
+        @(posedge SLOW_CLK)
         begin
-            i_Read_Request <= 0;
+            i_VeriferStart <= 0;
         end
 
-        @(negedge test_top.ReadSystem_top_ahb.FIFO_Reader_Helper_0.State);
+        while ( test_top.ReadSystem_top_ahb.FIFO_Reader_Helper_0.FIFO_Reader_Done == 0)  @(posedge SLOW_CLK) 
+        begin
+            if (randNumGen_Int2.read_ornot == 1) begin 
+                i_Read_Request <= 1;
+                Read_Counter <= Read_Counter + 1;
+            end else begin 
+                i_Read_Request <= 0;
+                Read_Counter <= Read_Counter;  
+            end
+            randNumGen_Int2.randomize();
+        end
 
         repeat(4) @(posedge SLOW_CLK);
     end

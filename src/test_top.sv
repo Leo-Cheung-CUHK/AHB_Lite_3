@@ -4,7 +4,8 @@ module test_top(
         input logic           SLOW_CLK,
         input logic           SLOW_RESETn,
         input logic           i_Read_Request,
-        input logic           i_ReadSystemStart
+        input logic           i_ReadSystemStart,
+        input logic           i_VeriferStart
 );
 
 // Core system 
@@ -50,6 +51,8 @@ logic           ReadSystem_slave_done;
 logic           WriteSystem_slave_done;
 logic           Other_slave_done;
 
+logic           FIFO_Reader_Done;
+
 Read_Verifier  Read_Verifier_0(
                         .CLK(SLOW_CLK),
                         .RESETn(SLOW_RESETn),
@@ -58,7 +61,8 @@ Read_Verifier  Read_Verifier_0(
                         .i_RCC_DMA_ADDR_LOW(o_RCC_DMA_ADDR_LOW),
                         .i_RCC_BUFFER_LENGTH(o_RCC_BUFFER_LENGTH),
 
-                        .Read_Request(i_Read_Request),
+                        .i_VerifierStart(i_VeriferStart),
+                        .FIFO_Reader_Done(FIFO_Reader_Done),
 
                         .i_Reader_FIFO_rd_en(o_FIFO_rd_en),
                         .i_serialized_output(O_serialized_output),
@@ -96,7 +100,8 @@ ReadSystem_ahb3lite_top ReadSystem_top_ahb(
                         .HREADY(ReadSystem_HREADY),
                         .o_HTRANS(ReadSystem_HTRANS),
 
-                        .slave_done(ReadSystem_slave_done)
+                        .slave_done(ReadSystem_slave_done),
+                        .FIFO_Reader_Done(FIFO_Reader_Done)
 );
 
 WriteSystem_ahb3lite_top WriteSystem_top_ahb(

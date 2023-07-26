@@ -1,63 +1,66 @@
-module ReadSystem_ahb3lite_top(
-                input   logic           HCLK, 
-                input   logic           HRESETn,
-                input   logic           SLOW_CLK,
-                input   logic           SLOW_RESETn,
-                input   logic           i_Read_Request,
-                input   logic           i_ReadSystemStart,
+import ahb3lite_pkg::* ;
 
-                output  logic           [7:0] O_serialized_output,
-                output  logic           O_serialized_output_valid,
-                output  logic           [1:0] O_Serialize_Counter,
-                output  logic           [15:0] O_Bytes_Counter,
-                output  logic           [15:0] O_RCC_BYTE_CNT,
+module ReadSystem_ahb3lite_top(
+                input   wire           HCLK, 
+                input   wire           HRESETn,
+                input   wire           SLOW_CLK,
+                input   wire           SLOW_RESETn,
+                input   wire           i_Read_Request,
+                input   wire           i_ReadSystemStart,
+
+                output  wire           [7:0] O_serialized_output,
+                output  wire           O_serialized_output_valid,
+                output  wire           [1:0] O_Serialize_Counter,
+                output  wire           [15:0] O_Bytes_Counter,
+                output  wire           [15:0] O_RCC_BYTE_CNT,
 
                 // Memory Signals
-                output logic            [31:0] mem_WR_addr,
-                output logic            mem_read_flag,
-                input  logic            [31:0]  HRDATA_fromMem,
+                output wire            [31:0] mem_WR_addr,
+                output wire            mem_read_flag,
+                input  wire            [31:0]  HRDATA_fromMem,
 
                 // Register Signals
-                input  logic            [5:0]  i_RCC_BUFFER_LENGTH,
-                input  logic            [15:0] i_RCC_DMA_ADDR_HIGH,
-                input  logic            [15:0] i_RCC_DMA_ADDR_LOW,
+                input  wire            [5:0]  i_RCC_BUFFER_LENGTH,
+                input  wire            [15:0] i_RCC_DMA_ADDR_HIGH,
+                input  wire            [15:0] i_RCC_DMA_ADDR_LOW,
 
                 // Verifier signals
-                output logic            o_FIFO_rd_en,
+                output wire            o_FIFO_rd_en,
 
                 // From Switch 
-                input  logic            HREADY,
+                input  wire            HREADY,
 
-                output HTRANS_state     o_HTRANS,
+                output HTRANS_state    o_HTRANS,
 
-                output logic            slave_done
+                output wire            slave_done,
+                output wire            FIFO_Reader_Done
 );
                 // ReadSystem 
-                logic                   [31:0]  HADDR;
-                logic                   [31:0]  HRDATA;
-                logic                   HWRITE;
+                wire                   [31:0]  HADDR;
+                wire                   [31:0]  HRDATA;
+                wire                   HWRITE;
 
-                HBURST_Type             HBURST;
-                logic                   [2:0]   HSIZE;
-                HTRANS_state            HTRANS;
+                HBURST_Type            HBURST;
+                wire                   [2:0]   HSIZE;
+                HTRANS_state           HTRANS;
 
-                logic                   HREADYOUT;
-                HRESP_state             HRESP;
+                wire                   HREADYOUT;
+                HRESP_state            HRESP;
 
-                logic                   HRDATA_En;
+                wire                   HRDATA_En;
 
-                logic                   [31:0]  o_HRDATA;
-                logic                   o_HRDATA_En;
+                wire                   [31:0]  o_HRDATA;
+                wire                   o_HRDATA_En;
 
                 // FIFO Signals
-                logic                   [31 : 0] FIFO_din;
-                logic                   FIFO_wr_en;
-                logic                   FIFO_rd_en;
-                logic                   [31 : 0] FIFO_dout;
-                logic                   FIFO_valid;
-                logic                   [5 : 0] FIFO_data_count;
-                logic                   FIFO_full;
-                logic                   FIFO_empty;
+                wire                   [31 : 0] FIFO_din;
+                wire                   FIFO_wr_en;
+                wire                   FIFO_rd_en;
+                wire                   [31 : 0] FIFO_dout;
+                wire                   FIFO_valid;
+                wire                   [5 : 0] FIFO_data_count;
+                wire                   FIFO_full;
+                wire                   FIFO_empty;
 
 assign  o_HTRANS    = HTRANS;
 
@@ -81,7 +84,8 @@ FIFO_Reader_Helper  FIFO_Reader_Helper_0 (
                         .serialized_output_valid(O_serialized_output_valid),
                         .Serialize_Counter(O_Serialize_Counter),
                         .Bytes_Counter(O_Bytes_Counter),
-                        .RCC_BYTE_CNT(O_RCC_BYTE_CNT)
+                        .RCC_BYTE_CNT(O_RCC_BYTE_CNT),
+                        .FIFO_Reader_Done(FIFO_Reader_Done)
 );
 
 async_fifo  FIFO_Master_Side_0(

@@ -7,7 +7,8 @@ module Read_Verifier(
     input logic         [15:0] i_RCC_DMA_ADDR_LOW,
     input logic         [5:0]  i_RCC_BUFFER_LENGTH,
 
-    input  logic        Read_Request,
+    input  logic        i_VerifierStart,
+    input  logic        FIFO_Reader_Done,
 
     input logic         i_Reader_FIFO_rd_en,
     input logic         [7:0] i_serialized_output,
@@ -33,7 +34,7 @@ module Read_Verifier(
         end else begin
             case (State)
                 Verifier_IDLE : begin 
-                    if (Read_Request == 1) begin
+                    if (i_VerifierStart == 1) begin
                         State            <= Verifier_Start;
                         DMA_READ         <= 1;
                         DMA_READ_addr    <= {i_RCC_DMA_ADDR_HIGH, i_RCC_DMA_ADDR_LOW};
@@ -65,7 +66,7 @@ module Read_Verifier(
                         DMA_READ_addr <= DMA_READ_addr;
                     end
 
-                    if (i_serialized_output_valid == 0) 
+                    if (FIFO_Reader_Done == 1) 
                         State <= Verifier_IDLE;
                     else
                         State <= State;
@@ -98,12 +99,14 @@ module Read_Verifier(
                     if (i_serialized_output_valid == 1)
                         bytes_counter <= bytes_counter + 1;
                     else begin
-                        if (bytes_counter != i_RCC_BUFFER_LENGTH)
-                            len_error <= 1;
-                        else 
-                            len_error <= 0;
-                        
-                        bytes_counter <= 0;
+                        if (FIFO_Reader_Done == 1) begin 
+                            if (bytes_counter != i_RCC_BUFFER_LENGTH)
+                                len_error <= 1;
+                            else 
+                                len_error <= 0;
+                            
+                            bytes_counter <= 0;
+                        end
                     end
                 end
 
